@@ -1,0 +1,13 @@
+rali:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('SUPABASE_HOST') }}"
+      user: "{{ env_var('SUPABASE_USER') }}"
+      password: "{{ env_var('SUPABASE_DB_PASSWORD') }}"
+      port: "{{ env_var('SUPABASE_PORT') | as_number }}"
+      dbname: postgres
+      schema: dbt_dev
+      threads: 4
+      sslmode: require
