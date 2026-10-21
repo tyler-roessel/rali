@@ -1,0 +1,100 @@
+version: 2
+
+models:
+  - name: int_account_clusters
+    description: >
+      Every staged restaurant with its dedup key, cluster size, and survivorship
+      rank. Keeping all members (not just the survivor) makes over-merging
+      inspectable. Real data only.
+    columns:
+      - name: dedup_key
+        description: >
+          Conservative cluster key: same normalized name plus street address;
+          full address only when city/postcode conflict; coordinate fallback
+          only when the address is missing; osm_uid fallback when both are
+          missing.
+        tests:
+          - not_null
+      - name: match_rule
+        description: "Which rule produced dedup_key."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["street_address", "street_name", "full_address", "geo_4dp", "geo_50m", "uid_fallback"]
+      - name: osm_uid
+        description: "Member record key."
+        tests:
+          - not_null
+      - name: source_record_count
+        description: "Number of OSM records in this cluster."
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 1"
+      - name: survivor_rank
+        description: "1 = richest record in the cluster, kept by int_account_deduped."
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 1"
+
+  - name: int_account_deduped
+    description: >
+      One row per resolved account. Survivorship keeps the record with a
+      website, then a phone, then the lowest OSM id. is_chain is an exact
+      normalized-name match against the curated alias seed, not a fuzzy match.
+      Real identity data; no synthetic lifecycle fields.
+    columns:
+      - name: account_id
+        description: "uuid5(dedup_key), matching the synthetic lifecycle account ids."
+        tests:
+          - unique
+          - not_null
+      - name: dedup_key
+        description: "Cluster key. Unique by construction."
+        tests:
+          - unique
+          - not_null
+      - name: address_key
+        description: >
+          The survivor's own address-rule key before the geo_50m pass. For a
+          geo_50m cluster this can differ from dedup_key: dedup_key is the
+          canonical cluster id (the lexicographically least key in the proximity
+          pair), while address_key is where the surviving record actually sits.
+        tests:
+          - not_null
+      - name: osm_uid
+        description: "Surviving OSM record."
+        tests:
+          - unique
+          - not_null
+      - name: match_rule
+        description: "Which identity rule produced this cluster."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["street_address", "street_name", "full_address", "geo_4dp", "geo_50m", "uid_fallback"]
+      - name: source_record_count
+        description: >
+          Records merged into this account. A value above 1 is a merge that was
+          hand-checked in the Phase 2 audit.
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 1"
+      - name: is_chain
+        description: "True when normalized_name exactly matches a curated chain alias."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+      - name: normalized_name
+        description: "Normalized name used for chain matching; not a display name."
+        tests:
+          - not_null

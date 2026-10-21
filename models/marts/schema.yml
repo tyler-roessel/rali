@@ -1,0 +1,219 @@
+version: 2
+
+models:
+  - name: dim_account
+    description: >
+      One row per resolved account. Account identity, address, chain flag and
+      territory are real/derived; the website signals are observed; the
+      fit_score is a rules-based rubric, not a prediction.
+    columns:
+      - name: account_id
+        description: "uuid5(dedup_key); joins to lifecycle events."
+        tests:
+          - unique
+          - not_null
+      - name: fit_score
+        description: "0-100 rubric; practical maximum is 90 because ordering and delivery-only are mutually exclusive."
+        tests:
+          - not_null
+          - between:
+              arguments:
+                min_value: 0
+                max_value: 100
+      - name: territory
+        description: "Coarse Chicago territory from postcode/city; Unknown when both are missing."
+        tests:
+          - not_null
+      - name: signal_confidence
+        description: "confirmed, unknown_no_match, or unknown_unreachable."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["confirmed", "unknown_no_match", "unknown_unreachable"]
+      - name: is_chain
+        description: "True for curated chain aliases."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+
+  - name: fct_lifecycle_event
+    description: >
+      Synthetic event spine, one row per event. Incremental delete+insert on
+      event_id. The events are generated, not real CRM history.
+    columns:
+      - name: event_id
+        description: "Deterministic uuid5 event id."
+        tests:
+          - unique
+          - not_null
+      - name: account_id
+        description: "Account that generated the event."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_account')
+                field: account_id
+      - name: event_name
+        description: "One of the eight lifecycle stage/event names."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["prospect_created", "demo_booked", "closed_won", "onboarded", "first_order", "30_day_active", "support_ticket", "renewal_due"]
+      - name: source_system
+        description: "Always synthetic."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["synthetic"]
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ["account_id", "event_name"]
+
+  - name: fct_account_health
+    description: >
+      One row per account (including accounts with no lifecycle events).
+      Adoption, support and renewal risk are rules-based.
+    columns:
+      - name: account_id
+        description: "Account key."
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_account')
+                field: account_id
+      - name: adoption_score
+        description: "0-100 rules score; 0 for accounts with no onboarding."
+        tests:
+          - not_null
+          - between:
+              arguments:
+                min_value: 0
+                max_value: 100
+      - name: support_risk
+        description: "high, medium, or low."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["high", "medium", "low"]
+      - name: renewal_risk
+        description: "high, medium, or low."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["high", "medium", "low"]
+
+  - name: mart_sales_queue
+    description: >
+      Popmenu-facing ranked independent-account queue. signal_confidence and
+      failure_class are top-level so a reviewer sorting by fit_score sees the
+      evidence state inline.
+    columns:
+      - name: account_id
+        description: "Account key."
+        tests:
+          - unique
+          - not_null
+      - name: rank
+        description: "Sales rank by fit_score."
+        tests:
+          - unique
+          - not_null
+      - name: fit_score
+        description: "0-100 rubric."
+        tests:
+          - not_null
+          - between:
+              arguments:
+                min_value: 0
+                max_value: 100
+      - name: signal_confidence
+        description: "Account-level homepage signal confidence."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["confirmed", "unknown_no_match", "unknown_unreachable"]
+      - name: signal_coverage_pct
+        description: "Share of this queue with confirmed homepage signals, repeated per row."
+        tests:
+          - not_null
+          - between:
+              arguments:
+                min_value: 0
+                max_value: 100
+
+  - name: mart_cs_queue
+    description: >
+      Upserve-facing customer-success queue. One row per onboarded account.
+      signal_confidence and failure_class are top-level; signal_coverage_pct is
+      the queue's confirmed-signal share repeated per row.
+    columns:
+      - name: account_id
+        description: "Account key."
+        tests:
+          - unique
+          - not_null
+      - name: cs_rank
+        description: "CS rank by support/renewal risk then adoption."
+        tests:
+          - unique
+          - not_null
+      - name: adoption_score
+        description: "0-100 rules score."
+        tests:
+          - not_null
+          - between:
+              arguments:
+                min_value: 0
+                max_value: 100
+      - name: support_risk
+        description: "high, medium, or low."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["high", "medium", "low"]
+      - name: renewal_risk
+        description: "high, medium, or low."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["high", "medium", "low"]
+      - name: signal_confidence
+        description: "Account-level homepage signal confidence."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["confirmed", "unknown_no_match", "unknown_unreachable"]
+      - name: signal_coverage_pct
+        description: "Share of this queue with confirmed homepage signals, repeated per row."
+        tests:
+          - not_null
+          - between:
+              arguments:
+                min_value: 0
+                max_value: 100
+
+  - name: funnel_summary
+    description: >
+      Six-stage funnel with raw counts, stage-to-stage conversion and median
+      days between stages. Synthetic lifecycle output.
+    columns:
+      - name: stage_name
+        description: "Lifecycle stage name."
+        tests:
+          - unique
+          - not_null

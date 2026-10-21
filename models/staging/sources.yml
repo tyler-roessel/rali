@@ -1,0 +1,102 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: "{{ 'staging' if var('use_sample_data', false) else 'raw' }}"
+    description: >
+      Landing zone written by the Python extractors. Real OpenStreetMap data;
+      chain-tagged outlets are excluded before load. When use_sample_data is
+      true, the schema and identifiers switch to the committed sample seeds in
+      staging. Nothing in the live landing zone is synthetic.
+    tables:
+      - name: osm_restaurants
+        identifier: "{{ 'raw_accounts_sample' if var('use_sample_data', false) else 'osm_restaurants' }}"
+        description: >
+          One row per OSM node or way tagged amenity=restaurant in the Chicago
+          bbox, with a non-empty name and no brand/brand:wikidata tag.
+        columns:
+          - name: osm_uid
+            description: "Stable composite key: osm_type || ':' || osm_id."
+            tests:
+              - unique
+              - not_null
+          - name: osm_id
+            description: "Native OSM element id. Unique only within osm_type."
+            tests:
+              - not_null
+          - name: name
+            description: "Restaurant name as tagged in OSM."
+            tests:
+              - not_null
+          - name: loaded_at
+            description: "Snapshot load timestamp (not an event time)."
+            tests:
+              - not_null
+
+      - name: website_signals
+        identifier: "{{ 'website_signals_sample' if var('use_sample_data', false) else 'website_signals' }}"
+        description: >
+          One row per normalized host, homepage-only observed fragments.
+          Real observed data; no page content is stored. Rows with
+          fetch_status='skipped_third_party' were deliberately not fetched.
+        columns:
+          - name: domain
+            description: "Normalized host, no www."
+            tests:
+              - unique
+              - not_null
+          - name: fetch_status
+            description: "ok, timeout, http_error, dns_error, or skipped_third_party."
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ["ok", "timeout", "http_error", "dns_error", "skipped_third_party"]
+          - name: signal_confidence
+            description: "confirmed, unknown_no_match, or unknown_unreachable."
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ["confirmed", "unknown_no_match", "unknown_unreachable"]
+          - name: failure_class
+            description: "Operational failure class; null for ok."
+            tests:
+              - accepted_values:
+                  arguments:
+                    values: ["blocked", "not_found", "server_error", "timeout", "dns_error", "connection_or_redirect", "skipped_third_party"]
+
+      - name: lifecycle_events
+        identifier: "{{ 'lifecycle_events_sample' if var('use_sample_data', false) else 'lifecycle_events' }}"
+        description: >
+          HEAVILY SYNTHETIC funnel events. The account identity is real OSM
+          data; every event, timestamp, and conversion is generated with
+          random.seed(42). Never present these as real CRM history.
+        columns:
+          - name: event_id
+            description: "uuid5(account_id + event_name); deterministic."
+            tests:
+              - unique
+              - not_null
+          - name: account_id
+            description: "uuid5(dedup_key)."
+            tests:
+              - not_null
+          - name: event_name
+            description: "One of the eight funnel/lifecycle event names."
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ["prospect_created", "demo_booked", "closed_won", "onboarded", "first_order", "30_day_active", "support_ticket", "renewal_due"]
+          - name: event_timestamp
+            description: "Synthetic UTC event time; monotonic within account and stage."
+            tests:
+              - not_null
+          - name: source_system
+            description: "Always synthetic."
+            tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: ["synthetic"]

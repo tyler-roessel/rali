@@ -1,0 +1,110 @@
+version: 2
+
+models:
+  - name: stg_restaurants
+    description: >
+      Normalized, typed restaurant records from real OpenStreetMap data. This
+      model is real data; it contains no synthetic lifecycle fields.
+    columns:
+      - name: osm_uid
+        description: "Stable composite key: osm_type || ':' || osm_id."
+        tests:
+          - unique
+          - not_null
+      - name: osm_type
+        description: "OSM element type. Nodes and ways only."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["node", "way"]
+      - name: name
+        description: "Display name as tagged in OSM."
+        tests:
+          - not_null
+      - name: normalized_name
+        description: >
+          Lowercase, punctuation-stripped, legal/taxonomy tokens removed.
+          Used for chain matching and for the name half of the dedup key.
+        tests:
+          - not_null
+      - name: normalized_address
+        description: >
+          House number + street + city + postcode, lowercased, unit designators
+          removed, common suffixes standardized. Null when house number and
+          street are both missing; the dedup model then uses coordinates.
+      - name: normalized_street
+        description: >
+          House number + street only, without city/postcode. Used for the
+          conservative street-address merge so a missing city/postcode does not
+          split an otherwise identical record.
+      - name: normalized_street_name
+        description: >
+          Street name without the house number, used only when a group has at
+          most one distinct house number. Catches partial address tags without
+          merging different addresses on the same street.
+      - name: addr_housenumber_norm
+        description: "First numeric token of the house number; ranges and unit suffixes collapsed for matching."
+      - name: full_address
+        description: "Human-readable address assembled with null-safe concatenation."
+      - name: has_website
+        description: "True when a public website URL is present. Not a judgment about quality."
+        tests:
+          - not_null
+      - name: has_phone
+        description: "True when a business phone is present. No personal mobile numbers are collected."
+        tests:
+          - not_null
+
+  - name: stg_chain_aliases
+    description: >
+      Curated chain aliases, normalized with the same function as restaurant
+      names. Exact normalized-name equality is the only match rule.
+    columns:
+      - name: chain_brand
+        description: "Canonical chain brand."
+        tests:
+          - not_null
+      - name: normalized_alias
+        description: "Alias after normalize_name(); the join key."
+        tests:
+          - not_null
+
+  - name: stg_website_signals
+    description: >
+      Homepage fingerprint results, one row per normalized host. Real observed
+      data; no page content is stored. signal_confidence is page-level and does
+      not prove that a specific absent capability is absent.
+    columns:
+      - name: domain
+        description: "Normalized host, www stripped."
+        tests:
+          - unique
+          - not_null
+      - name: has_website
+        description: "True for every domain row."
+        tests:
+          - not_null
+      - name: signal_confidence
+        description: >
+          confirmed = page loaded and at least one fragment matched;
+          unknown_no_match = page loaded, no fragment matched;
+          unknown_unreachable = fetch failed or third-party page skipped.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["confirmed", "unknown_no_match", "unknown_unreachable"]
+      - name: failure_class
+        description: "Operational failure class; null for ok."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["blocked", "not_found", "server_error", "timeout", "dns_error", "connection_or_redirect", "skipped_third_party"]
+      - name: fetch_status
+        description: "ok, timeout, http_error, dns_error, or skipped_third_party."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["ok", "timeout", "http_error", "dns_error", "skipped_third_party"]

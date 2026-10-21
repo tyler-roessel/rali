@@ -1,0 +1,75 @@
+cuisine_token,is_high_fit,note
+italian,true,Full-service cuisine with direct-ordering and reservation demand
+pizza,true,High-frequency direct ordering and delivery
+mexican,true,Full-service and fast-casual direct ordering
+american,true,Broad full-service category
+seafood,true,Reservation-led and high-ticket
+steakhouse,true,Reservation-led and high-ticket
+sushi,true,Reservation-led and direct ordering
+japanese,true,Full-service and direct ordering
+thai,true,Direct ordering
+indian,true,Direct ordering
+chinese,true,Direct ordering
+korean,true,Full-service and direct ordering
+mediterranean,true,Full-service and direct ordering
+middle_eastern,true,Full-service and direct ordering
+greek,true,Full-service
+french,true,Reservation-led
+spanish,true,Reservation-led
+tapas,true,Reservation-led
+barbecue,true,Direct ordering and catering
+bbq,true,Direct ordering and catering
+vegetarian,true,Full-service and direct ordering
+vegan,true,Full-service and direct ordering
+brunch,true,Reservation and direct-ordering demand
+breakfast,true,Direct ordering
+diner,true,Full-service
+burgers,true,Direct ordering
+burger,true,Direct ordering
+sandwiches,true,Direct ordering
+sandwich,true,Direct ordering
+cafe,true,Coffee/food hybrid with ordering demand
+coffee,true,Coffee/food hybrid with ordering demand
+new_american,true,Full-service
+contemporary,true,Full-service
+latin,true,Full-service
+peruvian,true,Full-service
+brazilian,true,Full-service
+cuban,true,Full-service
+caribbean,true,Full-service
+vietnamese,true,Direct ordering
+ramen,true,Direct ordering
+noodles,true,Direct ordering
+asian,true,Full-service and direct ordering
+fusion,true,Full-service
+polish,true,Full-service
+german,true,Full-service
+irish,true,Full-service
+ethiopian,true,Full-service
+persian,true,Full-service
+nepalese,true,Full-service
+pakistani,true,Full-service
+bangladeshi,true,Full-service
+filipino,true,Full-service
+hawaiian,true,Full-service
+creole,true,Full-service
+cajun,true,Full-service
+soul_food,true,Full-service
+tacos,true,Direct ordering
+burritos,true,Direct ordering
+pasta,true,Direct ordering
+pizzeria,true,Direct ordering
+dumplings,true,Direct ordering
+fast_food,false,Counter-service; not the target motion
+dessert,false,Low average ticket
+ice_cream,false,Low average ticket
+bakery,false,Low average ticket unless also a full-service cuisine
+donuts,false,Low average ticket
+juice,false,Low average ticket
+smoothie,false,Low average ticket
+bubble_tea,false,Low average ticket
+food_court,false,Shared address and counter service
+hotdog,false,Counter service
+pretzel,false,Counter service
+popcorn,false,Retail snack
+candy,false,Retail snack

@@ -1,0 +1,211 @@
+osm_uid,osm_id,osm_type,name,cuisine,addr_street,addr_housenumber,addr_city,addr_postcode,phone,website,opening_hours,brand,operator,lat,lon,loaded_at
+node:10061549413,10061549413,node,Santiago's,,North Pulaski Road,4803,Chicago,60630,,,,,,41.9684499,-87.7279003,2026-10-21 02:43:12.808378+00:00
+node:10112504033,10112504033,node,Momentum Coffee,,,,,,,,We-Su 10:00-14:00,,,41.8871055,-87.7176993,2026-10-21 02:43:12.808378+00:00
+node:10313004437,10313004437,node,Buffet City,,,,,,,,,,,41.765229,-87.7229475,2026-10-21 02:43:12.808378+00:00
+node:10837806923,10837806923,node,Olive Tree,mediterranean,,,,,,,,,,41.7522453,-87.9131457,2026-10-21 02:43:12.808378+00:00
+node:10951807594,10951807594,node,Feed Your Head,international,,,,,,,,,,41.8883152,-87.6255701,2026-10-21 02:43:12.808378+00:00
+node:11055225905,11055225905,node,Artango Bar & Steakhouse,argentinian;steak_house,,,,,,,,,,41.9683026,-87.6881592,2026-10-21 02:43:12.808378+00:00
+node:11088315712,11088315712,node,Gemini Grill,,North State Street,750,Chicago,60654,,,,,,41.8962151,-87.6285913,2026-10-21 02:43:12.808378+00:00
+node:11098530575,11098530575,node,Da Local Boy,hawaiian,South Franklin Street,335,Chicago,60606,,https://dalocalboychicago.toast.site/,,,,41.8770201,-87.6350082,2026-10-21 02:43:12.808378+00:00
+node:11134714145,11134714145,node,Hashbrowns,,North Wells Street,1155,Chicago,60610,,,,,,41.9037217,-87.6342409,2026-10-21 02:43:12.808378+00:00
+node:11242106149,11242106149,node,Kimchi Pop,korean,North Broadway,4429,Chicago,60640,,https://www.kimchipopbychefson.com/,"Mo-Fr 17:00-21:00; Sa,Su 11:30-21:00",,,41.9625455,-87.6554232,2026-10-21 02:43:12.808378+00:00
+node:11242106150,11242106150,node,Taqueria Diamante,mexican,North Broadway,4431,Chicago,60640,+1 773-770-9190,,Mo-Sa 11:00-21:00,,,41.9626094,-87.6554688,2026-10-21 02:43:12.808378+00:00
+node:11277171689,11277171689,node,Tacos De Canasta,,,,,,,,,,,41.8085565,-87.685723,2026-10-21 02:43:12.808378+00:00
+node:11638848188,11638848188,node,Iyanzé,costa_rican,North Broadway,4625,,,,https://iyanzeonline.com/,Mo-Su 11:00-20:00; Fr 11:00-24:00; Sa 00:00-02:00,,,41.9661505,-87.6577115,2026-10-21 02:43:12.808378+00:00
+node:11651396567,11651396567,node,Mizu,sushi,,,,,,,,,,41.6532437,-87.8569888,2026-10-21 02:43:12.808378+00:00
+node:11672692560,11672692560,node,Poke Poké,poke,West Madison Street,1100,Chicago,60607,+1-312-929-2696,https://www.pokepokechi.com/,Mo-Sa 11:00-21:00; Su 11:00-20:00,,,41.8818201,-87.6545557,2026-10-21 02:43:12.808378+00:00
+node:11786814238,11786814238,node,Osaka Sushi & Fresh Fruit Smoothies,sushi,,,,,,,Mo-Fr 11:00-21:00; Sa 12:00-21:00,,,41.8769062,-87.6245788,2026-10-21 02:43:12.808378+00:00
+node:11807488198,11807488198,node,Common Decency,,West Diversey Avenue,3154,Chicago,60647,,,,,,41.9321297,-87.7071171,2026-10-21 02:43:12.808378+00:00
+node:11871736422,11871736422,node,Jerk Yard,jamaican,East 53rd Street,1310,Chicago,60615,,,,,,41.7996285,-87.5945339,2026-10-21 02:43:12.808378+00:00
+node:11887094974,11887094974,node,Cuckoo,chicken;korean,North Clark Street,5143,Chicago,60640,,,,,,41.9756533,-87.6681987,2026-10-21 02:43:12.808378+00:00
+node:11897459795,11897459795,node,Casa Margarita,mexican,East Hinsdale Avenue,25,Hinsdale,60521,,,,,,41.8028375,-87.9282175,2026-10-21 02:43:12.808378+00:00
+node:12012367898,12012367898,node,Roti,greek,East Lake Street,80,Chicago,60601,+13128588190,https://roti.com/,,,,41.8859238,-87.6251855,2026-10-21 02:43:12.808378+00:00
+node:12056381688,12056381688,node,Thai Spoon and Sushi,sushi,,,,,,,,,,41.8742865,-87.6258048,2026-10-21 02:43:12.808378+00:00
+node:12167120485,12167120485,node,Nancy's Pizzeria,pizza,West Washington Boulevard,1000,Chicago,60607,,https://nancyspizza.com/locations/west-loop/,,,,41.8832355,-87.6529948,2026-10-21 02:43:12.808378+00:00
+node:12187329120,12187329120,node,MiMi's Craft Kitchen,,West Taylor Street,1352,Chicago,,,,,,,41.8695002,-87.6612114,2026-10-21 02:43:12.808378+00:00
+node:12194573746,12194573746,node,Kyōten,sushi,West Armitage Avenue,2507,Chicago,60647,,https://kyotenchicago.com/,,,,41.9174154,-87.6902982,2026-10-21 02:43:12.808378+00:00
+node:12194573747,12194573747,node,Kyōten Next Door,sushi,West Armitage Avenue,2513,Chicago,60647,,https://kyotenchicago.com/kyoten-next-door-now-open,,,,41.9174164,-87.6904143,2026-10-21 02:43:12.808378+00:00
+node:12239780462,12239780462,node,Jin Thai Cuisine,thai,,,,,+1 773 681 0555,https://www.jinthaicuisine.com/,Mo 11:30-21:00; We-Su 11:30-21:00,,,41.9816446,-87.6602706,2026-10-21 02:43:12.808378+00:00
+node:12250594818,12250594818,node,Laschet's Inn,german,West Irving Park Road,2119,Chicago,60618,,https://www.laschetsinn.com/,Tu-Sa 12:00-02:00; Su 12:00-24:00,,,41.953919,-87.6819953,2026-10-21 02:43:12.808378+00:00
+node:12343908637,12343908637,node,Fisherman's Island,seafood,South Stony Island Avenue,6724,Chicago,60649,,,,,,41.7725524,-87.5867408,2026-10-21 02:43:12.808378+00:00
+node:12346745017,12346745017,node,El Publano,mexican,West 51st Street,2610,Chicago,60632,+1-773-434-9901,,,,,41.8011738,-87.6896814,2026-10-21 02:43:12.808378+00:00
+node:12435104752,12435104752,node,Eggs With Benefits,breakfast,North Sheridan Road,6441,Chicago,60626,,https://eggswithbenefitschi.com/,,,,41.9995805,-87.6604271,2026-10-21 02:43:12.808378+00:00
+node:12591711501,12591711501,node,TABÚ,mexican,,,,,,https://tabuchicago.com/,,,,41.8891165,-87.6520924,2026-10-21 02:43:12.808378+00:00
+node:12628938001,12628938001,node,Wok cuisine,chinese,North Kedzie Avenue,4552,,60625,+1-708-637-0364,http://wokcuisineil.com,We-Mo 11:00-21:30,,,41.9644914,-87.7088192,2026-10-21 02:43:12.808378+00:00
+node:12646729164,12646729164,node,Kyuramen,ramen,West Hubbard Street,6,,,,,,,,41.890312,-87.6282493,2026-10-21 02:43:12.808378+00:00
+node:12708709227,12708709227,node,Curry On Fire,indian,West Taylor Street,1030,Chicago,60607,,https://www.curryonfirechicago.com,,,,41.869643,-87.6523766,2026-10-21 02:43:12.808378+00:00
+node:12714356813,12714356813,node,Izakaya Shinya,japanese,West North Avenue,2255,Chicago,60647,,,,,,41.9102425,-87.6845191,2026-10-21 02:43:12.808378+00:00
+node:12737670243,12737670243,node,Ahjoomah's Apron,korean,West Cermak Road,218,Chicago,60616,+1 312-326-2800,https://www.ahjoomahchicago.com/,Su-Th 11:00-21:30; Fr-Sa 11:00-22:00,,,41.8530324,-87.6326395,2026-10-21 02:43:12.808378+00:00
+node:12750740872,12750740872,node,Lao Sze Chuan,chinese,South Wabash Avenue,616,Chicago,60605,,,"Mo-Th 11:00-21:30; Fr,Sa 11:00-22:30; Su 11:00-21:30",,,41.8738787,-87.6262247,2026-10-21 02:43:12.808378+00:00
+node:12824387803,12824387803,node,Lao Der,asian;thai;lao,North Elston Avenue,3922,Chicago,60618,+1 872-241-4879,https://laoderchicago.com/,,,,41.9522905,-87.7173333,2026-10-21 02:43:12.808378+00:00
+node:12960060432,12960060432,node,WG  Pizzas,pizza,North Southport Avenue,2819,Chicago,60657,+1-872-315-3179,https://wgpizzas.com/,,,,41.9329736,-87.6632704,2026-10-21 02:43:12.808378+00:00
+node:13006533796,13006533796,node,Mariachi's Tacos,mexican,East Touhy Avenue,1936,Des Plaines,60018,+1-847-813-5134,,Mo-Sa 09:00-20:00,,,42.010242,-87.8764358,2026-10-21 02:43:12.808378+00:00
+node:13006533797,13006533797,node,Sunrise Grill,,East Touhy Avenue,1930,Des Plaines,60018,,,,,,42.0102461,-87.8765423,2026-10-21 02:43:12.808378+00:00
+node:13119421044,13119421044,node,Adalina Prime,steak_house,North Green Street,360,,,,https://www.adalinaprime.com,,,,41.8885677,-87.6489434,2026-10-21 02:43:12.808378+00:00
+node:13322931499,13322931499,node,K Kitchen,korean,North Clinton Street,131,Chicago,60661,,https://frenchmarketchicago.com/vendor/k-kitchen/,,,,41.8841081,-87.6405922,2026-10-21 02:43:12.808378+00:00
+node:13333000055,13333000055,node,Pita Pita,mediterranean,West Randolph Street,200,,,,,,,,41.8846034,-87.6341225,2026-10-21 02:43:12.808378+00:00
+node:13343826501,13343826501,node,The Churro Waffle,breakfast,West Irving Park Road,2845,,60618,,,"Mo, We-Fr 07:30-14:30; Sa-Su 07:00-15:00",,,41.9535857,-87.7000666,2026-10-21 02:43:12.808378+00:00
+node:13461322440,13461322440,node,Saffron Street,indian,South Clark Street,125,Chicago,60603,,,,,,41.87964,-87.6300709,2026-10-21 02:43:12.808378+00:00
+node:13536202101,13536202101,node,JT's Genuine Sandwich Shop,,Elston Avenue,3970,Chicago,60618,+1-773-754-7729,https://jtsgenuine.com/,Tu-Sa 11:00-19:00,,,41.9532612,-87.718754,2026-10-21 02:43:12.808378+00:00
+node:13566596737,13566596737,node,Bocadillo Market,spanish,West Grand Avenue,1117,,,,https://www.grandcruchicago.com,"Mo,Su 08:00-16:00; Th-Fr 08:00-16:00,19:00-19:30",,,41.8909431,-87.655341,2026-10-21 02:43:12.808378+00:00
+node:13574784340,13574784340,node,Yaya Mas Greek Kuzina,greek,North Sheffield Avenue,1755,Chicago,,+1-312-313-7006,https://yayamas.com/,,,,41.9136386,-87.653039,2026-10-21 02:43:12.808378+00:00
+node:13627180023,13627180023,node,Al Safa Mandi House,middle_eastern,West Touhy Avenue,3146,Chicago,60645,,https://alsafachicago.com/,,,,42.0122106,-87.7086424,2026-10-21 02:43:12.808378+00:00
+node:1385119524,1385119524,node,The Wild Goose Bar & Grill,american,North Lincoln Avenue,4600,Chicago,60625,+1-773-281-7112,https://www.wildgoosebar.com/,"Mo-Th,Su 11:00-23:00; Fr-Sa 11:00-00:00",,,41.9650343,-87.6864001,2026-10-21 02:43:12.808378+00:00
+node:13859732084,13859732084,node,Mariachi's Tacos,mexican,East Touhy Avenue,,Des Plaines,60018,+1-847-813-5134,https://mariachistacos.com,Mo-Sa 09:00-20:00,,,42.0103143,-87.8763279,2026-10-21 02:43:12.808378+00:00
+node:13963528315,13963528315,node,Submarine Tender,,Desplaines Avenue,200,Forest Park,60130,,,,,,41.882926,-87.8118073,2026-10-21 02:43:12.808378+00:00
+node:14068949670,14068949670,node,El Rayo Tacos,,West 79th Street,2055,Chicago,,,,,,,41.7499066,-87.6753285,2026-10-21 02:43:12.808378+00:00
+node:14069018093,14069018093,node,Sizzling Skillets,,South Cottage Grove Avenue,8635,Chicago,,+1-773-651-2433,,,,,41.7373951,-87.6046231,2026-10-21 02:43:12.808378+00:00
+node:14079153755,14079153755,node,Authentic Cheesesteaks,sandwich,,,,,,,,,,41.8345364,-87.8977944,2026-10-21 02:43:12.808378+00:00
+node:14081164167,14081164167,node,Pancho Pistolas Authentic Mexican Restaurant,mexican,West 31st Street,700,Chicago,60616,+1-312-225-8808,https://panchopistolas.com,Su-Th 11:00-22:00; Fr-Sa 11:00-23:00,,,41.8381983,-87.6440146,2026-10-21 02:43:12.808378+00:00
+node:14101225647,14101225647,node,Upbeet,,East Burlington Avenue,18,La Grange,60525,,,,,,41.8160404,-87.8688421,2026-10-21 02:43:12.808378+00:00
+node:14104255549,14104255549,node,Kapitan,malaysian,,,,,,,,,,41.9201316,-87.6625829,2026-10-21 02:43:12.808378+00:00
+node:14132059464,14132059464,node,Chim Thai Cuisine,thai;asian,West Montrose Ave,3254,Chicago,60625,+1-773-754-7239,https://chimthaicuisinetogo.com,,,,41.9613215,-87.7104169,2026-10-21 02:43:12.808378+00:00
+node:14143430584,14143430584,node,Lan Kwin Fong Bar and Grill,chinese,South Wallace Street,2428,Chicago,60616,,,,,,41.8483415,-87.6419619,2026-10-21 02:43:12.808378+00:00
+node:14154068205,14154068205,node,Kama,indian,North Milwaukee Avenue,1560,Chicago,60622,+1 773-904-7640,https://www.kamabistro.com/location/kama-wicker-park/,Mo-Th 16:00-21:30; Fr-Sa 12:00-22:30; Su 12:00-21:00,,,41.9097112,-87.6768363,2026-10-21 02:43:12.808378+00:00
+node:14197651770,14197651770,node,Kashgar Uyghur Dining,,North Pulaski,4830,,,+1 413 507 2121,https://www.kashgaruyghurdiningil.com/,,,,41.9695139,-87.7282655,2026-10-21 02:43:12.808378+00:00
+node:1700855288,1700855288,node,El Cid #2,mexican,,,,,,,,,,41.929754,-87.7072267,2026-10-21 02:43:12.808378+00:00
+node:1777277102,1777277102,node,Piece Brewery & Pizzeria,,West North Avenue,1927,Chicago,60622,+1-773-772-4422,https://www.piecechicago.com/,Mo-We 11:00-22:30; Th 11:00-23:00; Fr-Sa 11:00-00:30; Su 11:00-22:00,,,41.9102937,-87.6760621,2026-10-21 02:43:12.808378+00:00
+node:2285171996,2285171996,node,Staropolska Restaurant,polish,North Milwaukee Avenue,3030,Chicago,60618,+1-773-342-0779,https://staropolskarestaurant.com/,,,,41.936156,-87.7193663,2026-10-21 02:43:12.808378+00:00
+node:2292889299,2292889299,node,Eggy's,diner,East Benton Place,333,Chicago,60601,+1-773-234-3449,https://www.eggysdiner.com/locations/chicago/,,,,41.8854088,-87.6188393,2026-10-21 02:43:12.808378+00:00
+node:2323580274,2323580274,node,Taste of Lebanon,lebanese;middle_eastern,West Foster Avenue,1509,Chicago,60640,+1-773-334-1600,,Mo-Sa 11:00-17:00,,,41.9760684,-87.6688893,2026-10-21 02:43:12.808378+00:00
+node:2339944269,2339944269,node,Caffè Oliva,international,East Grand Avenue,550,Chicago,60611,,https://www.caffeoliva.com/,,,,41.893123,-87.6128059,2026-10-21 02:43:12.808378+00:00
+node:2514625642,2514625642,node,Weber Grill,steak;burger;ribs,North State Street,539,Chicago,60654,+1-312-467-9696,https://www.webergrillrestaurant.com/,Mo-Fr 06:30-10:00; Mo-Th 11:00-23:00; Fr 11:00-00:00; Sa-Su 06:30-11:00; Sa 11:30-00:00; Su 11:30-23:00,,,41.8920577,-87.6278696,2026-10-21 02:43:12.808378+00:00
+node:2641611905,2641611905,node,Phở Việt,vietnamese;noodle,,,,,,,"Mo-We,Fr 10:00-21:00; Sa,Su 09:30-21:00",,,41.9727857,-87.6595045,2026-10-21 02:43:12.808378+00:00
+node:2819355829,2819355829,node,Protein Bar & Kitchen,,West Lake Street,10,Chicago,60601,,,Mo 07:00-17:00; Tu-Th 07:00-19:00; Fr 07:00-15:00,,,41.8858837,-87.6286906,2026-10-21 02:43:12.808378+00:00
+node:2876689578,2876689578,node,Taco Burrito King,mexican,North Harlem Avenue,5509,Chicago,60656,,https://www.tacoburritoking.com/,24/7,,,41.9812402,-87.806711,2026-10-21 02:43:12.808378+00:00
+node:2968215000,2968215000,node,The Snail,thai,East 55th Street,1649,Chicago,60615,+1-773-667-5423,https://snailthai.com/,Tu-Su 11:00-20:00,,,41.7951291,-87.584784,2026-10-21 02:43:12.808378+00:00
+node:3278487306,3278487306,node,Surf's Up,seafood,,,,,,,,,,41.766396,-87.5699857,2026-10-21 02:43:12.808378+00:00
+node:3343162071,3343162071,node,The Purple Pig,american,North Michigan Avenue,444,Chicago,60611,+1-312-464-1744,https://thepurplepigchicago.com/,Mo-Su 11:00-22:00,,,41.8907486,-87.624603,2026-10-21 02:43:12.808378+00:00
+node:3407947954,3407947954,node,Protein Bar,,,,,,,,,,,41.8791383,-87.6350816,2026-10-21 02:43:12.808378+00:00
+node:3502294528,3502294528,node,Vinci,italian,North Halsted Street,1732,,,,,,,,41.9136875,-87.6485512,2026-10-21 02:43:12.808378+00:00
+node:3551892777,3551892777,node,Tacos Tequilas,mexican,North Milwaukee Avenue,2919,Chicago,60618,,,,,,41.9343813,-87.7158349,2026-10-21 02:43:12.808378+00:00
+node:3575070893,3575070893,node,Enoteca Roma,italian,West Division Street,2146,Chicago,60622,+1-773-772-7700,https://www.superyummy.com/enoteca-roma,We-Sa 16:00-21:30; Su 16:00-21:00; Mo-Tu off,,,41.9032845,-87.6816046,2026-10-21 02:43:12.808378+00:00
+node:3575072897,3575072897,node,Alegrias Seafood Chicago,mexican,North Ashland Avenue,1024,Chicago,60622,+1-773-252-7200,http://alegriasseafoodchicago.com,"Mo-Th, Su 10:00-22:00; Fr-Sa 10:00-23:00",,,41.9004836,-87.6676383,2026-10-21 02:43:12.808378+00:00
+node:3575120599,3575120599,node,Thai Lagoon,thai,West North Avenue,2322,Chicago,60647,+17734895747,https://thailagoononline.com/,Mo-Th 11:00-22:00; Fr 11:00-23:00; Sa 12:00-23:00; Su 12:00-22:00,,,41.9104695,-87.68575,2026-10-21 02:43:12.808378+00:00
+node:3575497026,3575497026,node,Presidio,,North Damen Avenue,1749,Chicago,60647,,,,,,41.9137424,-87.6773235,2026-10-21 02:43:12.808378+00:00
+node:3649643207,3649643207,node,Spicy Taco,mexican,North Milwaukee Avenue,2825,Chicago,60618,,,,,,41.9325547,-87.7128675,2026-10-21 02:43:12.808378+00:00
+node:3652941309,3652941309,node,Jieyi Sushi,sushi;thai,North Milwaukee Avenue,1178,Chicago,60642,+1-773-292-5885,https://www.jieyisushichicagoil.com/,Mo-Sa 14:00-23:45; Su 15:00-23:45,,,41.9030503,-87.6662514,2026-10-21 02:43:12.808378+00:00
+node:3652955075,3652955075,node,So Gong Dong,korean,West North Avenue,2411,,,,,,,,41.9101411,-87.6877546,2026-10-21 02:43:12.808378+00:00
+node:3659138541,3659138541,node,La Cabaña de Don Luis #3,mexican,,,,,,,,,,41.9315048,-87.7389326,2026-10-21 02:43:12.808378+00:00
+node:3659153796,3659153796,node,Jibaritos y Mas,puerto_rican,West Fullerton Avenue,3400,Chicago,60647,+1-773-799-8601,https://www.orderjibaritosymas.com,,,,41.9248341,-87.7122744,2026-10-21 02:43:12.808378+00:00
+node:3660898211,3660898211,node,RL,,East Chicago Avenue,115,Chicago,60611,,,,,,41.8965127,-87.624786,2026-10-21 02:43:12.808378+00:00
+node:3756779614,3756779614,node,Hinsdale Prime Steak,,,,,,,,,,,41.8027829,-87.9274066,2026-10-21 02:43:12.808378+00:00
+node:3844708277,3844708277,node,Davanti Enoteca,italian;tapas,Hillgrove Avenue,800,Western Springs,60558,,,Mo-Tu 11:30-21:00; We-Th 11:30-21:30; Fr 11:30-22:00; Sa 11:00-22:00; Su 10:00-21:00,,,41.8101929,-87.8988313,2026-10-21 02:43:12.808378+00:00
+node:4006777056,4006777056,node,Bistrot Zinc,french,North State Street,1131,Chicago,60611,+1 312 337 1131,https://bistrotzinc.com,,,,41.9027749,-87.6283042,2026-10-21 02:43:12.808378+00:00
+node:4076939409,4076939409,node,Wen Gai,chinese,,,,,,,,,,41.8523623,-87.6847253,2026-10-21 02:43:12.808378+00:00
+node:4134476928,4134476928,node,A Taste of the Philippines,filipino,West Lawrence Avenue,5914,Chicago,60630,+1 720-746-8880,https://www.atasteofthephilippines.com/,We-Fr 10:00-14:00; Sa 09:00-14:00; Su[1] 10:00-14:00,,,41.9679551,-87.7755004,2026-10-21 02:43:12.808378+00:00
+node:4196262798,4196262798,node,Toast,,West Webster Avenue,746,Chicago,60614,+1-773-935-5600,https://chicago-toast.com/,,,,41.9219534,-87.648107,2026-10-21 02:43:12.808378+00:00
+node:4203574603,4203574603,node,Charlie's Restaurant,,Roosevelt Road,7427,Forest Park,60130,+1-708-771-1969,https://charliesrestaurantfp.wixsite.com/forestpark,Mo-Su 06:00-20:00,,,41.8650358,-87.8104716,2026-10-21 02:43:12.808378+00:00
+node:4470746300,4470746300,node,La Chapatta Grocery,mexican,South Whipple Street,2500,Chicago,60623,,,,,,41.8462601,-87.7017746,2026-10-21 02:43:12.808378+00:00
+node:4564443501,4564443501,node,Chicago Pizza and Oven Grinder Co.,pizza,,,,60614,+1 773 248 2570,https://chicagopizzaandovengrinder.com/,Mo-Th 16:00-23:00; Fr 16:00-00:00; Sa 11:30-00:00; Su 11:30-23:00,,,41.9208033,-87.6373192,2026-10-21 02:43:12.808378+00:00
+node:4567406790,4567406790,node,Jerk Jamaican Barbecue,jamaican,West Chicago Avenue,811,Chicago,60642,+1-312-763-2870,http://www.cafe.blue/,,,,41.8962302,-87.6482057,2026-10-21 02:43:12.808378+00:00
+node:4894033222,4894033222,node,Hecho en Oak Park,mexican,Lake Street,1053,Oak Park,60301,,,,,,41.8885326,-87.8021674,2026-10-21 02:43:12.808378+00:00
+node:5002004773,5002004773,node,Crisp,korean,North Broadway,2940,Chicago,60657,+1 773 697 7610,https://www.crisponline.com/crisp.aspx,,,,41.9361201,-87.6444045,2026-10-21 02:43:12.808378+00:00
+node:5092612002,5092612002,node,Riccardo Enoteca,italian,North Clark Street,2116,Chicago,60614,+1-773-549-5010,https://www.riccardoenoteca.com/,"Mo-Su 16:00-21:00; Fr,Sa 16:00-22:00",,,41.920646,-87.6376583,2026-10-21 02:43:12.808378+00:00
+node:5161413725,5161413725,node,Kirkwood Bar & Grill,american;pub,North Sheffield Avenue,2934,Chicago,60657,+1-773-770-0700,https://kirkwoodbar.com/,Mo-Fr 17:00-02:00; Sa 11:00-03:00; Su 11:00-02:00,,,41.9354732,-87.6541061,2026-10-21 02:43:12.808378+00:00
+node:5359347426,5359347426,node,Half Sour,,South Clark Street,755,Chicago,60605,+1-312-224-1772,https://halfsourchicago.com/,,,,41.872428,-87.6304237,2026-10-21 02:43:12.808378+00:00
+node:5369425085,5369425085,node,Paul's Pizza & HotDogs,pizza;burger,Wolf Road,3044,Westchester,60154,+1-708-531-9080,http://pauls-pizza.com/,Tu-Sa 11:00-21:00,,,41.8354112,-87.8985105,2026-10-21 02:43:12.808378+00:00
+node:5441403136,5441403136,node,Swift & Sons,seafood;steak_house,West Fulton Market,1000,Chicago,60607,+1-312-733-9420,https://www.swiftandsonschicago.com/,Mo-Th 16:30-23:00; Fr-Sa 16:30-00:00; Su 16:30-22:30,,,41.8869686,-87.6524319,2026-10-21 02:43:12.808378+00:00
+node:5457017161,5457017161,node,Rosebud on Rush,steak_house,North Rush Street,720,Chicago,60611,+1-312-266-6444,https://rosebudrestaurants.com/,Mo-Th 11:00-23:00; Fr 11:00-00:00; Sa 08:00-00:00; Su 08:00-23:00,,,41.895595,-87.6258346,2026-10-21 02:43:12.808378+00:00
+node:5457225505,5457225505,node,Ema,mediterranean,West Illinois Street,74,Chicago,60654,+1-312-527-5586,http://emachicago.com/,Mo-Th 11:30-22:00; Fr-Sa 11:30-23:00; Su 11:30-21:00,,,41.8910012,-87.6308546,2026-10-21 02:43:12.808378+00:00
+node:5457607519,5457607519,node,Mercadito,mexican,West Kinzie Street,108,Chicago,60654,+1-312-329-9555,https://www.mercaditorestaurants.com/,Mo-We 11:30-21:30; Th-Fr 11:30-22:30; Sa 10:30-22:30; Su 10:30-21:30,,,41.8894067,-87.6319768,2026-10-21 02:43:12.808378+00:00
+node:5457742356,5457742356,node,Moe's Cantina,mexican,West Kinzie Street,155,Chicago,60654,+1-312-245-2000,https://www.moescantina.com/,We-Th 17:00-24:00; Fr 16:00-02:00; Sa 10:30-03:00,,,41.8890572,-87.6332026,2026-10-21 02:43:12.808378+00:00
+node:5457756133,5457756133,node,Highline Bar + Lounge,,West Kinzie Street,169,Chicago,60654,+1-312-533-2742,https://highlinebarchicago.com/,Su-Fr 11:00-02:00; Sa 11:00-03:00,,,41.8890366,-87.6337487,2026-10-21 02:43:12.808378+00:00
+node:5457768988,5457768988,node,Le Select,,North Wells Street,504,Chicago,60654,,https://www.leselectchicago.com,,,,41.8911495,-87.6342632,2026-10-21 02:43:12.808378+00:00
+node:5460671489,5460671489,node,Gibsons Italia,italian,North Canal Street,233,Chicago,60606,+1-312-414-1100,https://gibsonsitalia.com/,Mo-Sa 11:00-00:00,,,41.8866391,-87.6396434,2026-10-21 02:43:12.808378+00:00
+node:5460822466,5460822466,node,The Gundis,kurdish,North Clark Street,2909,Chicago,60657,+1-773-904-8120,https://thegundis.com/,Mo 09:00-21:00; We-Th 09:00-21:00; Fr-Sa 09:00-22:00; Su 09:00-20:00,,,41.9351065,-87.6465617,2026-10-21 02:43:12.808378+00:00
+node:5922299661,5922299661,node,Mama Luigi's Restaurant,italian,Harlem Avenue,7500,Bridgeview,60455,+1-708-496-0900,https://www.mamaluigis.com/,Mo-Fr 11:00-23:00; Sa 16:00-01:00; Su 12:00-22:00,,,41.755058,-87.8004455,2026-10-21 02:43:12.808378+00:00
+node:6146160785,6146160785,node,PERILLA fare,korean,North Milwaukee Avenue,401,Chicago,60654,+1-312-243-3344,https://perillachicago.com/,Su-Th 17:00-21:00; Fr-Sa 17:00-23:00,,,41.8893525,-87.6445067,2026-10-21 02:43:12.808378+00:00
+node:6154498893,6154498893,node,The Slab Bar-B-Que,barbecue,East 71st Street,1918,Chicago,60649,,,,,,41.7663374,-87.5779586,2026-10-21 02:43:12.808378+00:00
+node:6154499681,6154499681,node,Ta'golazo,mexican,East 71st Street,2247,Chicago,60649,+1-872-529-3404,,,,,41.766037,-87.5694489,2026-10-21 02:43:12.808378+00:00
+node:6191165327,6191165327,node,Two Lights Seafood & Oyster,seafood,West North Avenue,227,Chicago,60610,+1-312-929-3091,https://twolightschicago.com/,Mo-Fr 17:00-22:00; Sa 17:00-23:00; Su 17:00-21:00,,,41.9109366,-87.6358742,2026-10-21 02:43:12.808378+00:00
+node:6221682531,6221682531,node,Somerset,,North State Street,1112,Chicago,60610,+1-312-586-2150,https://www.somersetchicago.com/,,,,41.9023751,-87.6288081,2026-10-21 02:43:12.808378+00:00
+node:6263226555,6263226555,node,Villa Rosa Pizza Kitchen,pizza,,,,,,,,,,41.9971695,-87.7627801,2026-10-21 02:43:12.808378+00:00
+node:6267308623,6267308623,node,Bistro 6050,,West Irving Park Road,6050,Chicago,60634,+1-312-883-6050,https://www.bistro6050.com/,,,,41.9532126,-87.7787617,2026-10-21 02:43:12.808378+00:00
+node:6269003684,6269003684,node,Bongiorno’s Italian Deli & Pizzeria,,North Wabash Avenue,405,Chicago,60611,+1-312-755-1255,http://www.bongiornoschicago.com/,,,,41.8898208,-87.62637,2026-10-21 02:43:12.808378+00:00
+node:6269382429,6269382429,node,Butcher & The Burger,,West Armitage Avenue,1021,Chicago,60614,+1-773-697-3735,https://www.butcherandtheburger.com/,,,,41.9179047,-87.6542335,2026-10-21 02:43:12.808378+00:00
+node:6283090050,6283090050,node,Coast Sushi Bar,sushi,North Damen Avenue,2045,Chicago,60647,+1-773-235-5775,http://www.coastsushi.net/,"Mo-Th,Su 16:00-22:00; Fr-Sa 16:00-23:00",,,41.9189969,-87.6773565,2026-10-21 02:43:12.808378+00:00
+node:6283974838,6283974838,node,Crosby’s Kitchen,american,North Southport Avenue,3455,Chicago,60657,+1-773-883-2525,https://crosbyschicago.com/,,,,41.9451152,-87.6637061,2026-10-21 02:43:12.808378+00:00
+node:6284020693,6284020693,node,Cup & Spoon,,West North Avenue,2415,Chicago,60647,+1-773-697-4421,https://www.cupandspoonchicago.com/,,,,41.9101324,-87.6880221,2026-10-21 02:43:12.808378+00:00
+node:6284631061,6284631061,node,Doc B’s Restaurant + Bar,,East Walton Street,100,Chicago,60611,+1-312-626-1300,https://www.docbsrestaurant.com/,,,,41.9002084,-87.6252109,2026-10-21 02:43:12.808378+00:00
+node:6294526485,6294526485,node,Hom Mali Thai and Sushi on North Ave,thai,West North Avenue,417,Chicago,60610,+1-312-664-3400,https://www.hommalichicago.com/,"Mo-Fr 11:00-15:00; Sa,Su 12:00-15:00,16:00-21:00",,,41.9108805,-87.6393364,2026-10-21 02:43:12.808378+00:00
+node:6297643296,6297643296,node,Schwa,,North Ashland Avenue,1466,Chicago,60622,+1-773-252-1466,https://schwarestaurant.com/,,,,41.9089411,-87.6679496,2026-10-21 02:43:12.808378+00:00
+node:6298939468,6298939468,node,Soule to Soule,southern,West Chicago Avenue,1931,Chicago,60622,+1-312-526-3825,https://www.souletosoule.com/,,,,41.8957548,-87.6758258,2026-10-21 02:43:12.808378+00:00
+node:6299336421,6299336421,node,Pars Cove Restaurant,middle_eastern,West Diversey Parkway,435,Chicago,60614,+1-773-549-1515,https://www.parscove.com/,,,,41.9325966,-87.6408545,2026-10-21 02:43:12.808378+00:00
+node:6300473188,6300473188,node,Poke Poké,,South Wabash Avenue,118,Chicago,60603,+1-312-631-3380,https://www.pokepokechi.com/,Mo-Sa 10:30-21:00; Su 10:30-20:30,,,41.8803679,-87.626366,2026-10-21 02:43:12.808378+00:00
+node:6300477487,6300477487,node,Pompei,italian,West Taylor Street,1531,Chicago,60607,+1-312-421-5179,https://www.pompeiusa.com,,,,41.8691156,-87.6655365,2026-10-21 02:43:12.808378+00:00
+node:6300506122,6300506122,node,Porto’s Peri Peri,,West Taylor Street,1419,Chicago,60607,+1-312-374-1912,https://www.portos-periperi.com/uic/,,,,41.869095,-87.6624694,2026-10-21 02:43:12.808378+00:00
+node:6300965222,6300965222,node,The Royal Grocer & Co,,North Damen Avenue,2118,Chicago,60647,+1-773-904-7805,https://royalgrocer.com/,Tu-Th 17:00-22:00; Fr 17:00-24:00; Sa 10:00-24:00; Su 10:00-15:00,,,41.920137,-87.6779363,2026-10-21 02:43:12.808378+00:00
+node:6304017578,6304017578,node,Temporis,american;new_american,North Ashland Avenue,933,Chicago,60622,+1-773-697-4961,https://www.temporischicago.com/,Tu-Sa 17:00-21:00,,,41.8989063,-87.6670205,2026-10-21 02:43:12.808378+00:00
+node:6305337839,6305337839,node,Toro Sushi,sushi,North Clark Street,2546,Chicago,60614,+1-773-348-7255,,,,,41.9321476,-87.6450562,2026-10-21 02:43:12.808378+00:00
+node:6306612141,6306612141,node,The Corner Farmacy,,North Leavitt Street,324,Chicago,60612,+1-563-271-7936,https://www.thecornerfarmacy.com/,,,,41.8879186,-87.6825861,2026-10-21 02:43:12.808378+00:00
+node:6314890056,6314890056,node,Jarabe- Mexican Street Food,mexican,West Taylor Street,2255,Chicago,60612,+1-312-725-0507,http://www.jarabechicago.com/,,,,41.8688898,-87.6833702,2026-10-21 02:43:12.808378+00:00
+node:6315668706,6315668706,node,The Moonlighter,,West Armitage Avenue,3204,Chicago,60647,+1-773-360-8896,https://www.themoonlighterchicago.com/,,,,41.9175996,-87.7073905,2026-10-21 02:43:12.808378+00:00
+node:6319246272,6319246272,node,Dearly Beloved,,North Franklin Street,900,Chicago,60610,,https://www.dearlybelovedchicago.com/,,,Machine Hospitality Group,41.899178,-87.6360476,2026-10-21 02:43:12.808378+00:00
+node:6320506737,6320506737,node,Little Bucharest Bistro,romanian,North Elston Avenue,3661,Chicago,60618,+1-773-604-8500,https://littlebucharestbistro.com/,,,,41.9479734,-87.7105082,2026-10-21 02:43:12.808378+00:00
+node:6321487749,6321487749,node,Margeaux Brasserie,french,East Walton Street,11,Chicago,60611,+1-708-529-1246,https://www.michaelmina.net/restaurants/chicago/margeaux-brasserie/,,,,41.8997256,-87.6276208,2026-10-21 02:43:12.808378+00:00
+node:6322955756,6322955756,node,The Corner Farmacy,,North Bell Avenue,324,Chicago,60612,+1-563-271-7936,https://www.thecornerfarmacy.com/,,,,41.8881143,-87.6824802,2026-10-21 02:43:12.808378+00:00
+node:6323975670,6323975670,node,Olive Mediterranean Grill,,West North Avenue,1001,Chicago,60642,+1-312-274-5525,https://eatomg.com/,,,,41.9106,-87.6536581,2026-10-21 02:43:12.808378+00:00
+node:6324088187,6324088187,node,Noble Thai,thai,West Chicago Avenue,1371,Chicago,60642,+1-312-846-1867,https://www.noblethai.com/,Mo 11:00-21:00; Tu off; We-Su 11:00-21:00,,,41.8959969,-87.6621632,2026-10-21 02:43:12.808378+00:00
+node:6375521718,6375521718,node,Caffe Mercato,,,,,,,,,,,41.9773772,-87.9038843,2026-10-21 02:43:12.808378+00:00
+node:6412792357,6412792357,node,La Choza Mexican Grill,mexican,North Clark Street,7022,Chicago,60626,+1-773-465-2162,,Su-Th 10:00-00:00;Fr-Sa 10:00-02:00,,,42.0097145,-87.6744344,2026-10-21 02:43:12.808378+00:00
+node:6412818878,6412818878,node,Denden Restaurant,eritrean,North Clark Street,6635,Chicago,60626,+1-773-973-4752,,,,,42.002762,-87.6720083,2026-10-21 02:43:12.808378+00:00
+node:6651820282,6651820282,node,Danke,sandwich,South Clark Street,125,Chicago,60603,+1-312-783-4084,http://www.dankechicago.com/,,,,41.8797073,-87.6302825,2026-10-21 02:43:12.808378+00:00
+node:6651949788,6651949788,node,Antique Taco Chiquito,mexican;tacos,South Clark Street,125,Chicago,60603,+1-773-770-6195,http://www.antiquetaco.com/,,,,41.8797787,-87.6302003,2026-10-21 02:43:12.808378+00:00
+node:6848141104,6848141104,node,Nicky's Chinese Food,chinese,South Woodlawn Avenue,5231,Chicago,60615,+1-773-324-5340,,Mo-Su 10:30-00:00,,,41.7999965,-87.5965105,2026-10-21 02:43:12.808378+00:00
+node:7152419159,7152419159,node,Hon Kee Restaurant,chinese,,,,,,,,,,41.9734118,-87.657278,2026-10-21 02:43:12.808378+00:00
+node:7152419401,7152419401,node,Hon Kee Restaurant,chinese;barbecue,,,,,+1 773-878-6650,,We-Mo 09:00-21:00,,,41.9736536,-87.6575386,2026-10-21 02:43:12.808378+00:00
+node:7442864166,7442864166,node,Gabriela’s Carnitas,mexican,West Fullerton Avenue,3721,Chicago,60647,,,,,,41.9243876,-87.7203158,2026-10-21 02:43:12.808378+00:00
+node:8487075806,8487075806,node,Gringo & Blondie Taqueria,mexican,North Avenue,7514,Elmwood Park,60707,+1-708-716-3390,https://www.gringoandblondie.com/,,,,41.9089203,-87.8140505,2026-10-21 02:43:12.808378+00:00
+node:8508251827,8508251827,node,El Berrinches Restaurant,mexican,South Ashland Avenue,1807,Chicago,60608,+1 312 492 8295,http://www.elberrinchesrestaurant.com/,,,,41.8574841,-87.6659355,2026-10-21 02:43:12.808378+00:00
+node:8863665669,8863665669,node,Eden,,West Roscoe Street,2734,Chicago,60618,+1-312-366-2294,https://edeninchicago.com/,,,,41.9429635,-87.6968623,2026-10-21 02:43:12.808378+00:00
+node:8981002831,8981002831,node,Axum Ethiopian,ethiopian,North Broadway,5844,Chicago,60660,+1-773-654-3038,https://axumethiopiancuisine.com/,,,,41.9883114,-87.6604658,2026-10-21 02:43:12.808378+00:00
+node:9459516106,9459516106,node,Recess,,West Kinzie Street,838,Chicago,60607,+1-312-801-1181,https://chicagoinrecess.com,,,,41.8892308,-87.6495781,2026-10-21 02:43:12.808378+00:00
+node:9948866671,9948866671,node,Casita Cocula,mexican,South La Grange Road,5418,Countryside,60525,,,,,,41.7912528,-87.869072,2026-10-21 02:43:12.808378+00:00
+node:9971098353,9971098353,node,65 Express,chinese,,,,,,,Mo-Fr 10:00-19:00; Sa 11:00-16:00,,,41.8818038,-87.6344514,2026-10-21 02:43:12.808378+00:00
+node:9980789866,9980789866,node,Los 3 Compadres de Guerrero,mexican,,,,,,,"Su-Th 10:00-22:00, Fr,Sa 10:00-24:00",,,41.8980143,-87.6871166,2026-10-21 02:43:12.808378+00:00
+node:9980789868,9980789868,node,Do-Over Diner,,North Western Avenue,1026,Chicago,60622,,,"Mo 11:00-18:00; Th 17:00-24:00; Fr 17:00-24:00; Sa 00:00-02:00,17:00-24:00; Su 00:00-03:00,10:00-15:00",,,41.9001598,-87.6871949,2026-10-21 02:43:12.808378+00:00
+way:1055483186,1055483186,way,Russell's,barbecue,South La Grange Road,5545,Countryside,60525,,,,,,41.7889038,-87.8682126,2026-10-21 02:43:12.808378+00:00
+way:1161341474,1161341474,way,Taqueria Los Altos De Jalisco,mexican,,,,,,,,,,41.8540558,-87.7446378,2026-10-21 02:43:12.808378+00:00
+way:1169100069,1169100069,way,Mama Luigi's,italian,Harlem Avenue,,Bridgeview,60455,,,,,,41.7550512,-87.8004844,2026-10-21 02:43:12.808378+00:00
+way:1323929017,1323929017,way,Nino's Pizza,pizza,West 111th Street,4835,Alsip,60803,,,,,,41.6905172,-87.7409149,2026-10-21 02:43:12.808378+00:00
+way:1327946641,1327946641,way,Paisans Pizzeria,pizza,West 111th Street,4900,Oak Lawn,60453,,https://www.paisanspizza.com/locations/oak-lawn/,,,,41.6912544,-87.7426938,2026-10-21 02:43:12.808378+00:00
+way:1336884984,1336884984,way,Cafe Mirage,european,Lawrence Avenue,9845,Schiller Park,60176,,https://www.ordecafemirage.com/,,,,41.9654377,-87.8731948,2026-10-21 02:43:12.808378+00:00
+way:1504713099,1504713099,way,Girl & The Goat,small_plates,West Randolph Street,809,Chicago,60607,+1-312-492-6262,https://girlandthegoat.com/,Su-Th 16:30-23:00; Fr-Sa 16:30-00:00,,,41.884111,-87.6479389,2026-10-21 02:43:12.808378+00:00
+way:162627782,162627782,way,Golden Nugget,american,North Central Avenue,3001,Chicago,60634,,https://goldennuggetpancake.com/,,,,41.9351362,-87.7661169,2026-10-21 02:43:12.808378+00:00
+way:163225919,163225919,way,Smak Tak,polish,North Elston Avenue,5961,Chicago,60646,+1-773-763-1123,,11:00-21:00,,,41.9897742,-87.7770701,2026-10-21 02:43:12.808378+00:00
+way:163907621,163907621,way,Little Bucharest Bistro,,North Elston Avenue,3661-3663,,,,,,,,41.9479624,-87.7105323,2026-10-21 02:43:12.808378+00:00
+way:163944693,163944693,way,Chim Thai Cuisine,thai;asian,West Montrose Avenue,3254,,,+1-773-754-7239,https://chimthaicuisinetogo.com,"Mo,We-Sa 11:00-21:00; Tu off; Su 11:30-21:00",,,41.961359,-87.7104093,2026-10-21 02:43:12.808378+00:00
+way:163944704,163944704,way,Kale My Name,,West Montrose Avenue,3300,Chicago,60625,+1-872-208-7125,https://www.kalemyname.com/,Mo-Su 11:00-22:00,,,41.9613423,-87.710878,2026-10-21 02:43:12.808378+00:00
+way:163949229,163949229,way,Wok cuisine,,North Kedzie Avenue,4552,,,+1 708-637-0364,https://www.wokcuisineil.com,"Mo, We-Su 11:00-21:30",,,41.9644885,-87.7088218,2026-10-21 02:43:12.808378+00:00
+way:209390013,209390013,way,New China Restaurant,chinese,West Division Street,2438,Chicago,60622,+1-773-394-9188,http://ordernewchinail.com,Mo-Th 11:00-21:00; Fr-Sa 11:00-22:00; Su 12:00-21:00,,,41.9032543,-87.688621,2026-10-21 02:43:12.808378+00:00
+way:209404898,209404898,way,Dimo's Pizza,pizza,North Milwaukee Avenue,2246,Chicago,60647,,https://dimospizza.com/,,,,41.92156,-87.6956933,2026-10-21 02:43:12.808378+00:00
+way:209406792,209406792,way,Parson's Chicken & Fish,american,West Armitage Avenue,2952,Chicago,60647,+1-773-384-3333,https://www.parsonschickenandfish.com/,,,,41.9176491,-87.7012859,2026-10-21 02:43:12.808378+00:00
+way:209465347,209465347,way,Retro Pizza,pizza,North Western Avenue,3600,Chicago,60618,,https://retropizza.com,,,,41.9468562,-87.688519,2026-10-21 02:43:12.808378+00:00
+way:209570060,209570060,way,Arya Bhavan,indian,West Devon Avenue,2508,Chicago,60645,+1-773-274-5800,https://aryabhavan.com/,"Mo,We-Fr 17:00-21:00; Sa,Su 12:00-21:00",,,41.997936,-87.6928125,2026-10-21 02:43:12.808378+00:00
+way:209570127,209570127,way,Udupi Palace,indian;south_indian,West Devon Avenue,2543,,,+1-773-338-2152,https://udupichicago.com/,"Mo-Fr, Su 11:00-21:00; Sa 11:00-21:30",,,41.997414,-87.694009,2026-10-21 02:43:12.808378+00:00
+way:209853538,209853538,way,Bigsuda,korean;chinese,North Milwaukee Avenue,1362,Chicago,60622,+1 872-206-8678,https://www.bigsuda.com/,Tu-Th 17:00-22:00; Fr-Sa 12:00-22:30; Su 12:00-21:30,,,41.9064439,-87.6717371,2026-10-21 02:43:12.808378+00:00
+way:209863988,209863988,way,Cumin,nepalese;indian,North Milwaukee Avenue,1414,Chicago,60622,+1-773-342-1414,https://www.cumin-chicago.com/,,,,41.9074948,-87.6733858,2026-10-21 02:43:12.808378+00:00
+way:210171700,210171700,way,GREEK PRIME,greek;american,West 35th Street,901,Chicago,60609,,https://greekprime.com/,,,,41.8305273,-87.6479382,2026-10-21 02:43:12.808378+00:00
+way:210257371,210257371,way,Manny’s Cafeteria and Delicatessen,sandwich;deli,South Jefferson Street,1141,Chicago,60607,+1-312-939-2855,https://www.mannysdeli.com/,,,,41.8679154,-87.6419254,2026-10-21 02:43:12.808378+00:00
+way:210269519,210269519,way,The CrossRoads Bar & Grill,southern;american,West Madison Street,1120,Chicago,60607,+1-312-243-1113,https://www.thecrossroadschicago.com/,Su-Fr 11:00-02:00; Sa 11:00-03:00,,,41.8818915,-87.655317,2026-10-21 02:43:12.808378+00:00
+way:210314921,210314921,way,The Butcher & the Burger,burger,West Armitage Avenue,1021,Chicago,60614,+1-773-697-3735,https://butcherandtheburger.com/,,,,41.9179107,-87.6542348,2026-10-21 02:43:12.808378+00:00
+way:210382262,210382262,way,Golden House Restaurant,diner,North Racine Avenue,4744,Chicago,60640,,https://golden-house-restaurant.wusaw.com/,Mo-Su 07:00-15:00,,,41.9684538,-87.6600246,2026-10-21 02:43:12.808378+00:00
+way:210538091,210538091,way,Legend Tasty House,chinese,South Wentworth Avenue,2242,Chicago,60616,+1-312-225-8869,https://www.legendtastyhouse.com/,,,,41.8516116,-87.6322643,2026-10-21 02:43:12.808378+00:00
+way:210679287,210679287,way,Arbella,american,West Grand Avenue,114;112,Chicago,60654,+1-312-846-6654,https://arbellachicago.com/,Mo 17:00-00:00; Tu-Fr 17:00-02:00; Sa 17:00-03:00,,,41.8918204,-87.6318357,2026-10-21 02:43:12.808378+00:00
+way:210858618,210858618,way,Pepe's Mexican Restaurant,mexican,East 79th Street,131,Chicago,60619,,https://pepes.com/088/pepes-mexican-food-restaurants-Chicago-IL.php,,,,41.7508859,-87.6200675,2026-10-21 02:43:12.808378+00:00
+way:211377783,211377783,way,Rocky's Pancake House,pancake;breakfast,East 83rd Street,2948,Chicago,60617,+1-773-731-6694,,Mo-Su 06:30-15:00,,,41.744816,-87.5520408,2026-10-21 02:43:12.808378+00:00
+way:211395778,211395778,way,El Quetzal,mexican,South Ewing Avenue,9625,Chicago,60617,,,,,,41.7205479,-87.5350263,2026-10-21 02:43:12.808378+00:00
+way:24860842,24860842,way,Wildwood Tavern,american,North Caldwell Avenue,7201,Niles,60714,,https://www.wildwoodtavern.net/,,,,42.0125287,-87.788523,2026-10-21 02:43:12.808378+00:00
+way:323895782,323895782,way,L. Woods Tap & Pine Lodge,american,Lincoln Avenue,7110,Lincolnwood,60712,,https://www.lwoodsrestaurant.com,,,,42.0101521,-87.7378599,2026-10-21 02:43:12.808378+00:00
+way:348049798,348049798,way,Upper's Land,,West Calendar Avenue,25,,,,,,,,41.8150115,-87.8710192,2026-10-21 02:43:12.808378+00:00
+way:351505403,351505403,way,Il Girasole Trattoria,italian,North Western Avenue,2700,Chicago,60647,+1-872-315-2928,https://ilgirasoletrattoria.com/,,,,41.9304718,-87.6882235,2026-10-21 02:43:12.808378+00:00
+way:430462754,430462754,way,American Wild Burger,burger,,,,,,,,,,42.024391,-87.8853914,2026-10-21 02:43:12.808378+00:00
+way:440500165,440500165,way,Connie's Pizza,pizza,,,,,,,06:00-22:00,,,41.7879198,-87.7421523,2026-10-21 02:43:12.808378+00:00
+way:451463983,451463983,way,Palace Regency,american,West Cermak Road,,Cicero,60804,,,,,,41.8513778,-87.764161,2026-10-21 02:43:12.808378+00:00
+way:609058461,609058461,way,Libertad,mexican,Lincoln Avenue,7931,Skokie,60077,,,,,,42.0255545,-87.7550471,2026-10-21 02:43:12.808378+00:00
+way:690838419,690838419,way,Leon's Barbeque Zone,barbecue,East 106th Street,3309,Chicago,60617,,https://www.theoriginalleonsbbq.com/,,,,41.7025292,-87.5432228,2026-10-21 02:43:12.808378+00:00
+way:796351396,796351396,way,Affresco,,,,,,,,,,,42.0117632,-87.830013,2026-10-21 02:43:12.808378+00:00
+way:796351397,796351397,way,Affresco,,,,,,,,,,,42.0118218,-87.830036,2026-10-21 02:43:12.808378+00:00
+way:879392183,879392183,way,Strings Ramen,japanese,South Archer Avenue,2141,Chicago,60616,,,,,,41.8534067,-87.633211,2026-10-21 02:43:12.808378+00:00
+way:919954282,919954282,way,Mizu,sushi,West 131st Street,9664,Palos Park,60464,,,,,,41.6534005,-87.8569788,2026-10-21 02:43:12.808378+00:00

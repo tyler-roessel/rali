@@ -1,10 +1,21 @@
 .env
+.env.*
+!.env.example
 .venv/
-data/raw/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+
 target/
 dbt_packages/
 logs/
+.dbt/
+
+# Raw extracts are reproducible; do not commit full snapshots.
+data/
 *.parquet
-__pycache__/
-.DS_Store
+
+# dbt local user id
 .user.yml

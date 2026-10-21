@@ -1,0 +1,12 @@
+RALI Phase 4 lifecycle reproducibility
+Command: python -m extract.generate_lifecycle --summary-json <path>
+Seed: 42
+Run 1: 1636 events, hash bd7f47cbd38a68f58eb05856e4868736f29c8054ea84fd4554192541bf8962e9
+Run 2: 1636 events, hash bd7f47cbd38a68f58eb05856e4868736f29c8054ea84fd4554192541bf8962e9
+Hashes identical: True
+Event counts: {"30_day_active": 53, "closed_won": 111, "demo_booked": 370, "first_order": 75, "onboarded": 94, "prospect_created": 925, "renewal_due": 4, "support_ticket": 4}
+Funnel: {"30_day_active": 53, "closed_won": 111, "demo_booked": 370, "first_order": 75, "onboarded": 94, "prospect_created": 925}
+Conversions: {"account_to_prospect": 0.3498, "closed_won_to_onboarded": 0.8468, "demo_to_closed_won": 0.3, "first_order_to_30_day": 0.7067, "onboarded_to_first_order": 0.7979, "prospect_to_demo": 0.4}
+Messiness: {"handoff_leak_share_of_won": 0.0541, "handoff_leaks": 6, "renewal_share_of_onboarded": 0.0426, "renewal_without_first_order": 4, "support_share_of_30_day": 0.0755, "support_tickets": 4}
+Stage-order violations: 0
+Specific order violations: {"first_order_before_onboarded": 0, "onboarded_before_closed_won": 0}

@@ -1,20 +1,32 @@
-name: 'rali'
-version: '1.0.0'
+name: "rali"
+version: "1.0.0"
 config-version: 2
 
-profile: 'rali'
+profile: "rali"
 
 model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
-test-paths: ["tests"]
-target-path: "target"
+snapshot-paths: ["snapshots"]
+
 clean-targets:
   - "target"
   - "dbt_packages"
+  - "logs"
+
+vars:
+  # Phase 6 portability switch. When true, stg_restaurants reads the committed
+  # sample seed instead of the live raw schema. See README "Rebuild without a
+  # live database".
+  use_sample_data: false
 
 models:
   rali:
+    +persist_docs:
+      relation: true
+      columns: true
     staging:
       +schema: staging
       +materialized: view
@@ -24,3 +36,55 @@ models:
     marts:
       +schema: marts
       +materialized: table
+
+seeds:
+  rali:
+    # Reference data only, kept out of public like every other warehouse object.
+    +schema: staging
+    raw_accounts_sample:
+      +column_types:
+        osm_uid: text
+        osm_id: bigint
+        osm_type: text
+        name: text
+        cuisine: text
+        addr_street: text
+        addr_housenumber: text
+        addr_city: text
+        addr_postcode: text
+        phone: text
+        website: text
+        opening_hours: text
+        brand: text
+        operator: text
+        lat: double precision
+        lon: double precision
+        loaded_at: timestamptz
+    website_signals_sample:
+      +column_types:
+        domain: text
+        has_website: boolean
+        has_online_ordering: boolean
+        online_ordering_vendor: text
+        has_reservations: boolean
+        reservation_vendor: text
+        delivery_marketplaces: text
+        site_platform: text
+        signal_confidence: text
+        failure_class: text
+        fetch_status: text
+        http_status: integer
+        final_url: text
+        page_title: text
+        evidence: text
+        error_detail: text
+        account_count: integer
+        fetched_at: timestamptz
+    lifecycle_events_sample:
+      +column_types:
+        event_id: text
+        account_id: text
+        event_name: text
+        event_timestamp: timestamptz
+        source_system: text
+        event_properties: text
