@@ -39,7 +39,7 @@ The account universe is Chicago full-service restaurants: `amenity=restaurant` i
 
 - `dim_account` — 2,644 accounts, fit score 0–90 (the practical max is 90 because ordering and delivery-only are mutually exclusive).
 - `mart_sales_queue` — 2,638 independent accounts ranked by fit; 361 priority, 815 nurture, 1,462 low.
-- `mart_rep_research_queue` — additive view with evidence, research prompts, possible multi-location groups, and a closed outreach gate. It needs a fresh dbt build and is not included in the recorded counts above.
+- `mart_rep_research_queue` — additive view with evidence, research prompts, possible multi-location groups, and a closed outreach gate. The local 200-account sample build passed; live warehouse counts have not been refreshed.
 - `mart_cs_queue` — 94 onboarded accounts; 23 at risk, 49 expansion reviews, 4 support check-ins, 4 renewal saves.
 - `mart_handoff_exceptions` — closed-won accounts missing onboarding, with a demo owner assignment and a stable notification key. The committed events imply 17 live exceptions and one in the 200-account sample; this addition has not yet been included in a recorded dbt build.
 - `funnel_summary` — 925 → 370 → 111 → 94 → 75 → 53 across the six raw stages.
@@ -185,7 +185,7 @@ dotenv run -- dbt seed --profiles-dir . --full-refresh
 dotenv run -- dbt build --profiles-dir . --full-refresh --vars '{use_sample_data: true}'
 ```
 
-The recorded build before the handoff-alert addition verified 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, a 200-row identity map, and 167/167 tests with zero warnings. That run is captured in [`docs/sample_build_output.txt`](docs/sample_build_output.txt). A Postgres target is still required (dbt seeds into it), but the live raw tables are not. Use `--full-refresh` when the target already contains live marts so the incremental event fact is replaced rather than merged. The new handoff model and test need a fresh build before those results can be updated.
+The earlier recorded build verified 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, a 200-row identity map, and 167/167 tests with zero warnings; its log is [`docs/sample_build_output.txt`](docs/sample_build_output.txt). On October 21, 2026, the full sample build was rerun in an isolated local Postgres database with the pinned dbt 1.12.6 environment: **197/197 nodes passed, including 173 data tests**, with zero warnings or errors. The new research view returned 197 accounts, four rows with a possible shared-domain group, and zero rows ready for outreach. [Verification and DeepSeek handoff](docs/deepseek_handoff_2026-10-21.md). A Postgres target is still required (dbt seeds into it), but live raw tables are not. Run `--full-refresh` only against an isolated test target because it replaces the incremental event fact and other existing target relations.
 
 ## Monitoring
 
