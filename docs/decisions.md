@@ -206,6 +206,18 @@ The idempotency key is a SHA-256 of `account_id` plus the desired fields (name, 
 
 Production would add OAuth/secrets, a real CRM client, batching, rate limits, retries with a dead-letter path, and an audit log. The point of the simulation is the boundary: the warehouse computes the desired state; the edge computes the diff and performs idempotent upserts.
 
+## 6d. CRM identity resolution
+
+[`scripts/resolve_identities.py`](../scripts/resolve_identities.py) writes a 2,644-row mapping seed from `dim_account` and `seeds/mock_crm_accounts.csv`. Matching is one-to-one and waterfalled:
+
+1. exact normalized domain (confidence 100);
+2. exact phone (last ten digits) plus normalized address (confidence 100);
+3. fuzzy name + geo, with `confidence = 100 × (0.70 × name_similarity + 0.30 × max(0, 1 − distance/500))`.
+
+The fuzzy stage requires name similarity ≥ 0.55 and distance ≤ 500 m. Candidates below 95 are still mapped but carry `needs_human_review = true`. Unmatched accounts keep a row with a null `crm_account_id`, confidence 0, and method `unmatched`; they are not review cases because there is no candidate. CRM-only records are ignored and counted in the run summary.
+
+Current result: 6 matches (2 exact domain, 1 exact phone+address, 3 fuzzy), 2,638 unmatched, 3 review candidates, 1 CRM-only. `models/marts/crm_identity_map.sql` inner-joins the mapping to `dim_account`, so live is 2,644 rows and the 200-account sample map is 200 rows. The resolution seed is committed for clean-clone builds; the script is the generator, not a live CRM call.
+
 ## 7. Incremental strategy
 
 `fct_lifecycle_event` is incremental with `delete+insert` on `unique_key='event_id'` and `on_schema_change='append_new_columns'`.
@@ -231,12 +243,12 @@ dbt seed --profiles-dir . --full-refresh
 dbt build --profiles-dir . --full-refresh --vars '{use_sample_data: true}'
 ```
 
-Verified on the committed seeds: 200 accounts, 123 events, 197-row sales queue, 7-row CS queue, 6-row funnel, **140/140 tests, 0 warnings**. The sample build still needs a Postgres target (dbt seeds into it), but it makes no Overpass or website requests and does not depend on the live raw tables. On a database that already contains the live marts, `--full-refresh` is required so the incremental event fact is replaced rather than merged with live events.
+Verified on the committed seeds: 200 accounts, 123 events, 197-row sales queue, 7-row CS queue, 200-row identity map, 6-row funnel, **167/167 tests, 0 warnings**. The sample build still needs a Postgres target (dbt seeds into it), but it makes no Overpass or website requests and does not depend on the live raw tables. On a database that already contains the live marts, `--full-refresh` is required so the incremental event fact is replaced rather than merged with live events.
 
 ## 8a. Phase 6 verification
 
-- Live `dbt build`: **140/140, 0 warnings, 122 data tests**. The committed log is [`docs/dbt_test_output.txt`](dbt_test_output.txt).
-- Offline sample build: **140/140, 0 warnings** from 200 accounts, 123 events, a 197-row sales queue, and a 7-row CS queue. The committed log is [`docs/sample_build_output.txt`](sample_build_output.txt).
+- Live `dbt build`: **167/167, 0 warnings, 146 data tests**. The committed log is [`docs/dbt_test_output.txt`](dbt_test_output.txt).
+- Offline sample build: **167/167, 0 warnings** from 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, and a 200-row identity map. The committed log is [`docs/sample_build_output.txt`](sample_build_output.txt).
 - `fct_lifecycle_event` is incremental with `delete+insert`; a second run kept 1,636 rows and 1,636 distinct event IDs.
 - `tests/assert_lifecycle_stage_order.sql` and the custom `tests/generic/between.sql` test both pass.
 - Monitoring returns expected alerts, not pipeline errors: territory `Unknown` 17.8%, `full_address` null 13.6%, confirmed signal coverage 37.2%. Dedup duplicates, orphan events, out-of-order events, duplicate event pairs, fit-score range, and queue reconciliation are clean. `public` has zero base tables.

@@ -1,0 +1,43 @@
+version: 2
+
+seeds:
+  - name: mock_crm_accounts
+    description: "Mock CRM records used as the reverse-ETL target for identity resolution."
+    columns:
+      - name: crm_account_id
+        tests:
+          - unique
+          - not_null
+      - name: crm_name
+        tests:
+          - not_null
+
+  - name: crm_identity_resolution
+    description: >
+      Output of scripts/resolve_identities.py. One row per dim_account; null
+      crm_account_id means unmatched. A candidate below 95% confidence is
+      flagged for human review.
+    columns:
+      - name: account_id
+        tests:
+          - unique
+          - not_null
+      - name: match_method
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["exact_domain", "exact_phone_address", "fuzzy_name_geo", "unmatched"]
+      - name: match_confidence
+        tests:
+          - not_null
+          - between:
+              arguments:
+                min_value: 0
+                max_value: 100
+      - name: needs_human_review
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]

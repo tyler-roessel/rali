@@ -1,0 +1,8 @@
+crm_account_id,crm_name,domain,phone,address,city,postcode,lat,lon
+crm-2001,5 Rabanitos,5rabanitos.com,,,Chicago,60615,41.799338,-87.594843
+crm-2002,Andros Taverna,androstaverna.com,,,Chicago,60647,41.927298,-87.704872
+crm-2003,Asadito Tacos,,+1-312-929-2657,"30 North Clinton Street, Chicago, 60661",Chicago,60661,41.882683,-87.641470
+crm-2004,Athena Greek Taverna,,,,Chicago,60661,41.878716,-87.647621
+crm-2005,Big Star Tacos,,,,Chicago,60622,41.909500,-87.677500
+crm-2006,Bistronomic Bistro,,,,Chicago,60611,41.897876,-87.627138
+crm-2007,Closed Location,,,,Chicago,60600,41.950000,-87.700000

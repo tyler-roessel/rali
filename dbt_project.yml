@@ -84,6 +84,33 @@ seeds:
       +column_types:
         stage_order: integer
         counts_toward_funnel: boolean
+    mock_crm_accounts:
+      +column_types:
+        crm_account_id: text
+        crm_name: text
+        domain: text
+        phone: text
+        address: text
+        city: text
+        postcode: text
+        lat: double precision
+        lon: double precision
+    crm_identity_resolution:
+      +column_types:
+        account_id: text
+        account_name: text
+        warehouse_domain: text
+        warehouse_phone: text
+        warehouse_address: text
+        crm_account_id: text
+        crm_name: text
+        crm_domain: text
+        crm_phone: text
+        crm_address: text
+        match_method: text
+        match_confidence: numeric
+        needs_human_review: boolean
+        match_evidence: text
     lifecycle_events_sample:
       +column_types:
         event_id: text

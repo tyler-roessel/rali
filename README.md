@@ -17,6 +17,7 @@ The audience is hiring managers at restaurant-tech companies. The project is mea
 - **dbt marts** for a sales queue, a customer-success queue, a CRM lifecycle funnel, a raw-event funnel, and per-account health.
 - **An n8n approval harness** that drafts one outbound message and blocks it at a human Slack approval step.
 - **A reverse-ETL sync simulation** that diffs the warehouse against a mock CRM and emits idempotent create/update payloads.
+- **A CRM identity-resolution waterfall** with exact domain, exact phone+address, and fuzzy name+geo matching; sub-95% candidates are flagged for human review.
 - **A rules-based fit score** that can be explained in one paragraph without opening the code.
 - **Monitoring and tests** that answer "how would I know it broke?" rather than only "does it run?"
 
@@ -39,6 +40,7 @@ The account universe is Chicago full-service restaurants: `amenity=restaurant` i
 - `mart_cs_queue` — 94 onboarded accounts; 23 at risk, 49 expansion reviews, 4 support check-ins, 4 renewal saves.
 - `funnel_summary` — 925 → 370 → 111 → 94 → 75 → 53 across the six raw stages.
 - `mart_lifecycle_funnel` — CRM stages Lead 925 → SQL 370 → Opportunity 111 → Customer 94 → Active 75, with stage conversion and median days.
+- `crm_identity_map` — 2,644 accounts; 6 matched (2 exact domain, 1 exact phone+address, 3 fuzzy), 3 flagged for human review, 1 CRM-only record ignored.
 
 Both queues expose `signal_confidence`, `failure_class`, and `signal_coverage_pct` as top-level columns. Queue coverage is 37.2% confirmed; the other 62.8% are flagged as unknown rather than silently treated as “no signal.”
 
@@ -65,6 +67,30 @@ python scripts/sync_to_crm.py --sync-timestamp 2026-10-21T12:00:00Z
 Current result against the committed mock: **361 priority accounts → 358 creates, 1 update, 2 unchanged, 1 CRM-only ignored, 359 payloads**. The single update is Asadito (70 → 90). Running the same diff twice with a fixed timestamp produces byte-identical payloads and identical idempotency keys.
 
 The architectural point is that the **warehouse owns the business state** — rank, fit score, territory, intent, confidence — while the sync edge owns only the diff and the API call. The CRM receives idempotent upserts, not a re-send of the whole queue. A production version would add OAuth/secrets, a real CRM client, batching, rate-limit handling, retries with a dead-letter path, and an audit log. This is the "connect two systems with no native integration" pattern without pretending the mock is a real integration.
+
+## CRM Identity Resolution
+
+[`scripts/resolve_identities.py`](scripts/resolve_identities.py) compares `dim_account` to [`seeds/mock_crm_accounts.csv`](seeds/mock_crm_accounts.csv) and writes [`seeds/crm_identity_resolution.csv`](seeds/crm_identity_resolution.csv). [`models/marts/crm_identity_map.sql`](models/marts/crm_identity_map.sql) joins that output back to the dimension and CRM records for a reviewable map.
+
+Matching waterfall:
+
+1. **Exact domain** — 100% confidence.
+2. **Exact phone + normalized address** — 100% confidence.
+3. **Fuzzy name + geo** — `100 × (0.70 × name_similarity + 0.30 × geo_score)`, with a 500 m radius and a 0.55 name-similarity floor.
+
+Any candidate below **95%** is written with `needs_human_review = true`. Unmatched accounts have `match_method = 'unmatched'`, a null `crm_account_id`, and confidence 0; they are not review cases because there is no candidate to review.
+
+Current mock result: **2,644 accounts → 6 matched** (2 exact domain, 1 exact phone+address, 3 fuzzy), **2,638 unmatched**, **3 flagged for human review**, and **1 CRM-only record ignored**. The three review candidates are Athena (82.5), Big Star (77.9), and Bistronomic (83.1). The 2,638 unmatched rows are retained in the map rather than dropped; the model exposes `is_matched`.
+
+Regenerate and build:
+
+```bash
+python scripts/resolve_identities.py
+dbt seed --profiles-dir . --select mock_crm_accounts crm_identity_resolution
+dbt build --profiles-dir . --select crm_identity_map
+```
+
+The committed resolution seed makes the model buildable from a clean clone; the script is the reproducible generator, not a live API integration.
 
 ## Architecture
 
@@ -151,7 +177,7 @@ dotenv run -- dbt seed --profiles-dir . --full-refresh
 dotenv run -- dbt build --profiles-dir . --full-refresh --vars '{use_sample_data: true}'
 ```
 
-Verified on the committed seeds: 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, and 140/140 tests with zero warnings. The run is captured in [`docs/sample_build_output.txt`](docs/sample_build_output.txt). A Postgres target is still required (dbt seeds into it), but the live raw tables are not. Use `--full-refresh` when the target already contains live marts so the incremental event fact is replaced rather than merged.
+Verified on the committed seeds: 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, a 200-row identity map, and 167/167 tests with zero warnings. The run is captured in [`docs/sample_build_output.txt`](docs/sample_build_output.txt). A Postgres target is still required (dbt seeds into it), but the live raw tables are not. Use `--full-refresh` when the target already contains live marts so the incremental event fact is replaced rather than merged.
 
 ## Monitoring
 

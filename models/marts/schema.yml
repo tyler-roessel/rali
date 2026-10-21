@@ -254,3 +254,60 @@ models:
               arguments:
                 min_value: 0
                 max_value: 1
+
+  - name: crm_identity_map
+    description: >
+      Warehouse-to-CRM identity map. The waterfall is exact domain, exact
+      phone+address, then fuzzy name+geo. Candidate matches below 95%
+      confidence are flagged needs_human_review; unmatched accounts have a
+      null crm_account_id and match_method='unmatched'.
+    tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not is_matched or match_confidence >= 95 or needs_human_review"
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "is_matched = (crm_account_id is not null)"
+    columns:
+      - name: account_id
+        description: "Warehouse account key."
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_account')
+                field: account_id
+      - name: crm_account_id
+        description: "CRM account key; null when unmatched."
+        tests:
+          - relationships:
+              arguments:
+                to: ref('mock_crm_accounts')
+                field: crm_account_id
+      - name: match_method
+        description: "exact_domain, exact_phone_address, fuzzy_name_geo, or unmatched."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["exact_domain", "exact_phone_address", "fuzzy_name_geo", "unmatched"]
+      - name: match_confidence
+        description: "0-100 confidence; exact matches are 100."
+        tests:
+          - not_null
+          - between:
+              arguments:
+                min_value: 0
+                max_value: 100
+      - name: needs_human_review
+        description: "True for candidate matches below 95% confidence."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+      - name: is_matched
+        description: "True when a CRM account was assigned."
+        tests:
+          - not_null
