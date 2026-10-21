@@ -217,3 +217,40 @@ models:
         tests:
           - unique
           - not_null
+
+  - name: mart_lifecycle_funnel
+    description: >
+      CRM lifecycle funnel built from the raw event mapping. Lead, SQL,
+      Opportunity, Customer and Active are counted as distinct accounts that
+      reached the stage; post-sale activity is mapped to Active but does not
+      create an additional stage arrival.
+    columns:
+      - name: lifecycle_stage
+        description: "CRM stage name."
+        tests:
+          - unique
+          - not_null
+      - name: stage_order
+        description: "Lead=1 through Active=5."
+        tests:
+          - unique
+          - not_null
+      - name: accounts_reached
+        description: "Distinct accounts that reached the stage."
+        tests:
+          - not_null
+      - name: conversion_from_previous
+        description: "Stage conversion from the prior stage; null for Lead."
+        tests:
+          - between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: conversion_from_lead
+        description: "Stage conversion from Lead."
+        tests:
+          - not_null
+          - between:
+              arguments:
+                min_value: 0
+                max_value: 1

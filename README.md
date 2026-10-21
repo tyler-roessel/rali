@@ -14,7 +14,8 @@ The audience is hiring managers at restaurant-tech companies. The project is mea
 - **Identity resolution** over OSM records: a conservative match ladder (street name, house + street, full address, coordinate fallback, and a 50 m proximity supplement), survivorship by record richness, a visible `source_record_count`, and a committed [50-cluster audit](docs/dedup_audit_stratified.md) with 10/10 merge precision and 40/40 split precision.
 - **Evidence-based enrichment**: homepage-only website fingerprints that store the matched fragment strings, not just booleans.
 - **Synthetic lifecycle generation** that is deterministic and deliberately messy, with the mess documented rather than hidden.
-- **dbt marts** for a sales queue and a customer-success queue, plus a funnel summary and per-account health model.
+- **dbt marts** for a sales queue, a customer-success queue, a CRM lifecycle funnel, a raw-event funnel, and per-account health.
+- **An n8n approval harness** that drafts one outbound message and blocks it at a human Slack approval step.
 - **A rules-based fit score** that can be explained in one paragraph without opening the code.
 - **Monitoring and tests** that answer "how would I know it broke?" rather than only "does it run?"
 
@@ -35,9 +36,14 @@ The account universe is Chicago full-service restaurants: `amenity=restaurant` i
 - `dim_account` — 2,644 accounts, fit score 0–90 (the practical max is 90 because ordering and delivery-only are mutually exclusive).
 - `mart_sales_queue` — 2,638 independent accounts ranked by fit; 361 priority, 815 nurture, 1,462 low.
 - `mart_cs_queue` — 94 onboarded accounts; 23 at risk, 49 expansion reviews, 4 support check-ins, 4 renewal saves.
-- `funnel_summary` — 925 → 370 → 111 → 94 → 75 → 53 across the six stages.
+- `funnel_summary` — 925 → 370 → 111 → 94 → 75 → 53 across the six raw stages.
+- `mart_lifecycle_funnel` — CRM stages Lead 925 → SQL 370 → Opportunity 111 → Customer 94 → Active 75, with stage conversion and median days.
 
 Both queues expose `signal_confidence`, `failure_class`, and `signal_coverage_pct` as top-level columns. Queue coverage is 37.2% confirmed; the other 62.8% are flagged as unknown rather than silently treated as “no signal.”
+
+## Outbound approval harness (n8n)
+
+[`n8n/outbound_harness.json`](n8n/outbound_harness.json) is an inactive, importable workflow: Postgres pulls one row from `mart_sales_queue`, an OpenAI node drafts exactly two sentences, a Code guardrail checks length (80–500), sentence count (exactly 2), URLs, and placeholders, and an IF node routes the draft to Slack for a human approval reply. Failed drafts go to a hold branch and never reach Slack. The workflow does not auto-send; approval is a human action. Import it, set the Postgres/OpenAI/Slack credentials, and replace the `#sales-approvals` channel placeholder.
 
 ## Architecture
 
@@ -124,7 +130,7 @@ dotenv run -- dbt seed --profiles-dir . --full-refresh
 dotenv run -- dbt build --profiles-dir . --full-refresh --vars '{use_sample_data: true}'
 ```
 
-Verified on the committed seeds: 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, and 130/130 tests with zero warnings. The run is captured in [`docs/sample_build_output.txt`](docs/sample_build_output.txt). A Postgres target is still required (dbt seeds into it), but the live raw tables are not. Use `--full-refresh` when the target already contains live marts so the incremental event fact is replaced rather than merged.
+Verified on the committed seeds: 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, and 140/140 tests with zero warnings. The run is captured in [`docs/sample_build_output.txt`](docs/sample_build_output.txt). A Postgres target is still required (dbt seeds into it), but the live raw tables are not. Use `--full-refresh` when the target already contains live marts so the incremental event fact is replaced rather than merged.
 
 ## Monitoring
 
@@ -175,7 +181,8 @@ Restaurant data © OpenStreetMap contributors, available under the [Open Databas
 ```
 rali/
 ├── extract/            # Overpass pull, website fingerprints, synthetic lifecycle
-├── seeds/              # chain/cuisine lookups + 200-account offline sample
+├── seeds/              # chain/cuisine/lifecycle lookups + 200-account offline sample
+├── n8n/                # outbound approval harness (inactive template)
 ├── models/
 │   ├── staging/        # typed, normalized views
 │   ├── intermediate/   # identity resolution

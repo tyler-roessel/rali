@@ -80,6 +80,10 @@ seeds:
         error_detail: text
         account_count: integer
         fetched_at: timestamptz
+    lifecycle_mapping:
+      +column_types:
+        stage_order: integer
+        counts_toward_funnel: boolean
     lifecycle_events_sample:
       +column_types:
         event_id: text

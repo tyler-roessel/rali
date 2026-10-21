@@ -1,0 +1,9 @@
+event_name,lifecycle_stage,stage_order,counts_toward_funnel,note
+prospect_created,Lead,1,true,Funnel entry
+demo_booked,SQL,2,true,Sales-qualified demo
+closed_won,Opportunity,3,true,Proxy for the opportunity stage; the synthetic generator has no separate opportunity_created event
+onboarded,Customer,4,true,Contract won and handoff complete
+first_order,Active,5,true,First order placed; Active stage arrival
+30_day_active,Active,5,false,Retention milestone inside Active; not a separate stage arrival
+support_ticket,Active,5,false,Post-sale activity; not a stage arrival
+renewal_due,Active,5,false,Post-sale activity; not a stage arrival

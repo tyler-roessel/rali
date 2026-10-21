@@ -178,9 +178,25 @@ The score is not a propensity model and is not trained on outcomes. It is a prio
 
 `funnel_summary` returns six rows: 925 prospects, 370 demos, 111 won, 94 onboarded, 75 first orders, 53 30-day active; median days between stages are 9.1, 18.3, 8.1, 3.3, and 30.0.
 
+`mart_lifecycle_funnel` maps the raw event names to standard CRM stages through [`seeds/lifecycle_mapping.csv`](../seeds/lifecycle_mapping.csv):
+
+| CRM stage | Raw event | Accounts |
+|---|---|---:|
+| Lead | `prospect_created` | 925 |
+| SQL | `demo_booked` | 370 |
+| Opportunity | `closed_won` | 111 |
+| Customer | `onboarded` | 94 |
+| Active | `first_order` | 75 |
+
+`closed_won` is the proxy for Opportunity because the generator has no separate `opportunity_created` event. `30_day_active`, `support_ticket`, and `renewal_due` are mapped to Active but flagged `counts_toward_funnel = false`; they are post-sale milestones, not new stage arrivals. That is why Active is 75, not 53. Stage conversions are 40.0%, 30.0%, 84.7%, and 79.8%, with median days 9.1, 18.3, 8.1, and 3.3.
+
 `signal_coverage_pct` is the share of rows in the queue with `signal_confidence = 'confirmed'`, repeated per row. It is a queue-level context metric, not an account-level probability.
 
-**Territory limitation.** 470 accounts (17.8%) have neither a usable postcode nor a city and land in `Unknown`; they are retained, but territory slicing is weaker for that group. The `territory` column is never null, so a null-rate check alone would miss this. Phase 6 should add an Unknown-share monitor.
+**Territory limitation.** 470 accounts (17.8%) have neither a usable postcode nor a city and land in `Unknown`; they are retained, but territory slicing is weaker for that group. The `territory` column is never null, so a null-rate check alone would miss this. Phase 6 adds an Unknown-share monitor.
+
+## 6b. Outbound approval harness (n8n)
+
+[`n8n/outbound_harness.json`](../n8n/outbound_harness.json) is an inactive, importable workflow, not a running service. It pulls one row from `mart_sales_queue` with a Postgres node, asks an OpenAI node for exactly two sentences, normalizes the response, then runs a Code-node guardrail: length 80–500, exactly two sentence terminators, no URL, no `[placeholder]` or `{{template}}`. An IF node routes passing drafts to Slack for a human approval reply; failures go to a hold branch and never reach Slack. The workflow does not auto-send. Credentials and the Slack channel are placeholders because the harness must not embed secrets.
 
 ## 7. Incremental strategy
 
@@ -207,12 +223,12 @@ dbt seed --profiles-dir . --full-refresh
 dbt build --profiles-dir . --full-refresh --vars '{use_sample_data: true}'
 ```
 
-Verified on the committed seeds: 200 accounts, 123 events, 197-row sales queue, 7-row CS queue, 6-row funnel, **130/130 tests, 0 warnings**. The sample build still needs a Postgres target (dbt seeds into it), but it makes no Overpass or website requests and does not depend on the live raw tables. On a database that already contains the live marts, `--full-refresh` is required so the incremental event fact is replaced rather than merged with live events.
+Verified on the committed seeds: 200 accounts, 123 events, 197-row sales queue, 7-row CS queue, 6-row funnel, **140/140 tests, 0 warnings**. The sample build still needs a Postgres target (dbt seeds into it), but it makes no Overpass or website requests and does not depend on the live raw tables. On a database that already contains the live marts, `--full-refresh` is required so the incremental event fact is replaced rather than merged with live events.
 
 ## 8a. Phase 6 verification
 
-- Live `dbt build`: **130/130, 0 warnings, 114 data tests**. The committed log is [`docs/dbt_test_output.txt`](dbt_test_output.txt).
-- Offline sample build: **130/130, 0 warnings** from 200 accounts, 123 events, a 197-row sales queue, and a 7-row CS queue. The committed log is [`docs/sample_build_output.txt`](sample_build_output.txt).
+- Live `dbt build`: **140/140, 0 warnings, 122 data tests**. The committed log is [`docs/dbt_test_output.txt`](dbt_test_output.txt).
+- Offline sample build: **140/140, 0 warnings** from 200 accounts, 123 events, a 197-row sales queue, and a 7-row CS queue. The committed log is [`docs/sample_build_output.txt`](sample_build_output.txt).
 - `fct_lifecycle_event` is incremental with `delete+insert`; a second run kept 1,636 rows and 1,636 distinct event IDs.
 - `tests/assert_lifecycle_stage_order.sql` and the custom `tests/generic/between.sql` test both pass.
 - Monitoring returns expected alerts, not pipeline errors: territory `Unknown` 17.8%, `full_address` null 13.6%, confirmed signal coverage 37.2%. Dedup duplicates, orphan events, out-of-order events, duplicate event pairs, fit-score range, and queue reconciliation are clean. `public` has zero base tables.

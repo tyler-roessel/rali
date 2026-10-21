@@ -1,0 +1,256 @@
+{
+  "name": "RALI outbound approval harness",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## RALI outbound harness\n\n1. Set the **Postgres** credential to the Supabase session pooler.\n2. Set the **OpenAI** credential (or replace the AI node with your provider).\n3. Replace the Slack channel with your approvals channel.\n4. Execute manually. Approval is a human Slack reply, not an automatic send.\n\nThe guardrail rejects drafts under 80 or over 500 characters, drafts that are not exactly two sentences, URLs, and unresolved placeholders.",
+        "height": 300,
+        "width": 380
+      },
+      "id": "03f75e2f-1e29-4927-a80c-73cb8211341d",
+      "name": "Setup notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \"rank\", account_name, territory, fit_score, intent_signal, suggested_action, signal_confidence\nFROM marts.mart_sales_queue\nORDER BY \"rank\"\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "8b62f8b7-5cf3-4417-ad0f-2594f39904c0",
+      "name": "Pull 1 sales row",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You write concise, specific outbound copy for restaurant operators. You never invent results, URLs, or placeholders.",
+              "role": "system"
+            },
+            {
+              "content": "=Account: {{ $json.account_name }}\nTerritory: {{ $json.territory }}\nFit score: {{ $json.fit_score }}\nIntent: {{ $json.intent_signal }}\nSuggested action: {{ $json.suggested_action }}\n\nWrite exactly two sentences of outbound copy to the operator. Do not include a URL, placeholder, or claim about results.",
+              "role": "user"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cf0f13fc-71a8-4cc2-a50c-e36c42d2334b",
+      "name": "AI: draft 2 sentences",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        280,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function text(value) {\n  if (typeof value === 'string') return value;\n  if (Array.isArray(value)) return value.map(text).join(' ');\n  if (value && typeof value === 'object') return value.text ?? value.content ?? '';\n  return '';\n}\n\nconst source = $('Pull 1 sales row').first().json;\nconst raw =\n  $json.message?.content ??\n  $json.text ??\n  $json.output ??\n  $json.content ??\n  '';\nconst draft = text(raw).trim();\nreturn [{ json: { ...source, draft } }];"
+      },
+      "id": "a97b6426-727a-48b3-b760-d8b0d784357e",
+      "name": "Normalize draft",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const draft = String($json.draft || '').trim();\nconst sentences = (draft.match(/[.!?](?=\\s|$)/g) || []).length;\nconst lengthOk = draft.length >= 80 && draft.length <= 500;\nconst sentenceOk = sentences === 2;\nconst urlOk = !/https?:\\/\\//i.test(draft);\nconst placeholderOk = !/\\[[^\\]]+\\]|\\{\\{[^}]+\\}\\}/.test(draft);\nconst pass = lengthOk && sentenceOk && urlOk && placeholderOk;\n\nconst reasons = [];\nif (!lengthOk) reasons.push('length outside 80-500');\nif (!sentenceOk) reasons.push('not exactly 2 sentences');\nif (!urlOk) reasons.push('contains URL');\nif (!placeholderOk) reasons.push('contains placeholder');\n\nreturn [{\n  json: {\n    ...$json,\n    guardrail_pass: pass,\n    guardrail_reason: pass ? 'ok' : reasons.join('; '),\n    guardrail_checks: {\n      length_ok: lengthOk,\n      sentence_ok: sentenceOk,\n      url_ok: urlOk,\n      placeholder_ok: placeholderOk\n    }\n  }\n}];"
+      },
+      "id": "8b2b73bf-ef9e-4dbb-9f74-bf02f025e540",
+      "name": "Guardrail: regex + length",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "guardrail-pass",
+              "leftValue": "={{ $json.guardrail_pass }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3ba55d45-2084-4e58-83ad-f8d87431cac2",
+      "name": "Pass guardrail?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1060,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0123456789",
+          "mode": "list",
+          "cachedResultName": "#sales-approvals"
+        },
+        "text": "=Approval needed: {{ $json.account_name }} ({{ $json.territory }}), fit {{ $json.fit_score }}.\n\n{{ $json.draft }}\n\nGuardrail: {{ $json.guardrail_reason }}. Reply approve or reject before sending.",
+        "otherOptions": {}
+      },
+      "id": "74d9c653-4bec-44bd-9ed7-a28765d094be",
+      "name": "Slack: request approval",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1320,
+        -100
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "ed0b40c9-da6a-421a-a278-d5422236722e",
+      "name": "Awaiting human approval",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1580,
+        -100
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b6117c60-d00d-4766-8035-5b061f3efb70",
+      "name": "Hold for review",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        140
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Pull 1 sales row": {
+      "main": [
+        [
+          {
+            "node": "AI: draft 2 sentences",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: draft 2 sentences": {
+      "main": [
+        [
+          {
+            "node": "Normalize draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize draft": {
+      "main": [
+        [
+          {
+            "node": "Guardrail: regex + length",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrail: regex + length": {
+      "main": [
+        [
+          {
+            "node": "Pass guardrail?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pass guardrail?": {
+      "main": [
+        [
+          {
+            "node": "Slack: request approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Hold for review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: request approval": {
+      "main": [
+        [
+          {
+            "node": "Awaiting human approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d232ceda-82b3-4adb-9183-298589d3e20f",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
