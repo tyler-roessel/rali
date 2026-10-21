@@ -1,0 +1,42 @@
+{
+  "crm": "Mock CRM",
+  "generated_at": "2026-10-01T12:00:00Z",
+  "records": [
+    {
+      "crm_id": "crm-1001",
+      "account_id": "0d7fa22f-434c-5fdb-b44e-ee83b93e28bd",
+      "account_name": "5 Rabanitos",
+      "fit_score": 90,
+      "territory": "Chicago South",
+      "intent_signal": "first_party_ordering",
+      "last_synced_at": "2026-09-15T12:00:00Z"
+    },
+    {
+      "crm_id": "crm-1002",
+      "account_id": "db19351b-f620-59fd-ab3a-cf9db2969171",
+      "account_name": "Andros Taverna",
+      "fit_score": 90,
+      "territory": "Chicago Northwest",
+      "intent_signal": "first_party_ordering",
+      "last_synced_at": "2026-09-15T12:00:00Z"
+    },
+    {
+      "crm_id": "crm-1003",
+      "account_id": "a48bf04e-287a-53df-a3eb-b7367342c017",
+      "account_name": "Asadito",
+      "fit_score": 70,
+      "territory": "Chicago Downtown",
+      "intent_signal": "first_party_ordering",
+      "last_synced_at": "2026-08-01T12:00:00Z"
+    },
+    {
+      "crm_id": "crm-9999",
+      "account_id": "00000000-0000-0000-0000-000000000001",
+      "account_name": "Closed Location (CRM only)",
+      "fit_score": 85,
+      "territory": "Unknown",
+      "intent_signal": "no_web_signal",
+      "last_synced_at": "2026-07-01T12:00:00Z"
+    }
+  ]
+}

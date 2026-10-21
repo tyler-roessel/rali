@@ -16,6 +16,7 @@ The audience is hiring managers at restaurant-tech companies. The project is mea
 - **Synthetic lifecycle generation** that is deterministic and deliberately messy, with the mess documented rather than hidden.
 - **dbt marts** for a sales queue, a customer-success queue, a CRM lifecycle funnel, a raw-event funnel, and per-account health.
 - **An n8n approval harness** that drafts one outbound message and blocks it at a human Slack approval step.
+- **A reverse-ETL sync simulation** that diffs the warehouse against a mock CRM and emits idempotent create/update payloads.
 - **A rules-based fit score** that can be explained in one paragraph without opening the code.
 - **Monitoring and tests** that answer "how would I know it broke?" rather than only "does it run?"
 
@@ -44,6 +45,26 @@ Both queues expose `signal_confidence`, `failure_class`, and `signal_coverage_pc
 ## Outbound approval harness (n8n)
 
 [`n8n/outbound_harness.json`](n8n/outbound_harness.json) is an inactive, importable workflow: Postgres pulls one row from `mart_sales_queue`, an OpenAI node drafts exactly two sentences, a Code guardrail checks length (80–500), sentence count (exactly 2), URLs, and placeholders, and an IF node routes the draft to Slack for a human approval reply. Failed drafts go to a hold branch and never reach Slack. The workflow does not auto-send; approval is a human action. Import it, set the Postgres/OpenAI/Slack credentials, and replace the `#sales-approvals` channel placeholder.
+
+## Operationalizing the Warehouse (Reverse ETL)
+
+The warehouse is not useful if the sales team has to copy numbers into the CRM by hand. [`scripts/sync_to_crm.py`](scripts/sync_to_crm.py) simulates the reverse-ETL edge:
+
+1. **Read the curated state.** Pull `mart_sales_queue` rows with `fit_score >= 80` from Supabase.
+2. **Read the current CRM state.** Load the small [`mock_crm_records.json`](mock_crm_records.json) file.
+3. **Diff in the edge process.** Match on `account_id`: missing accounts are creates; existing accounts with a different `fit_score` are updates; equal scores are unchanged; CRM-only records are ignored so a sync never deletes.
+4. **Emit only the changes.** Print the JSON payloads a CRM API would receive, including `sync_timestamp`, `crm_id` for updates, and a deterministic `idempotency_key` derived from the desired state.
+
+```bash
+python scripts/sync_to_crm.py --mock-crm mock_crm_records.json
+# demo/reproducible variants:
+python scripts/sync_to_crm.py --limit 5
+python scripts/sync_to_crm.py --sync-timestamp 2026-10-21T12:00:00Z
+```
+
+Current result against the committed mock: **361 priority accounts → 358 creates, 1 update, 2 unchanged, 1 CRM-only ignored, 359 payloads**. The single update is Asadito (70 → 90). Running the same diff twice with a fixed timestamp produces byte-identical payloads and identical idempotency keys.
+
+The architectural point is that the **warehouse owns the business state** — rank, fit score, territory, intent, confidence — while the sync edge owns only the diff and the API call. The CRM receives idempotent upserts, not a re-send of the whole queue. A production version would add OAuth/secrets, a real CRM client, batching, rate-limit handling, retries with a dead-letter path, and an audit log. This is the "connect two systems with no native integration" pattern without pretending the mock is a real integration.
 
 ## Architecture
 
@@ -183,6 +204,8 @@ rali/
 ├── extract/            # Overpass pull, website fingerprints, synthetic lifecycle
 ├── seeds/              # chain/cuisine/lifecycle lookups + 200-account offline sample
 ├── n8n/                # outbound approval harness (inactive template)
+├── scripts/            # reverse ETL CRM sync simulation
+├── mock_crm_records.json
 ├── models/
 │   ├── staging/        # typed, normalized views
 │   ├── intermediate/   # identity resolution

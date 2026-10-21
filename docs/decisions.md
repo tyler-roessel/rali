@@ -198,6 +198,14 @@ The score is not a propensity model and is not trained on outcomes. It is a prio
 
 [`n8n/outbound_harness.json`](../n8n/outbound_harness.json) is an inactive, importable workflow, not a running service. It pulls one row from `mart_sales_queue` with a Postgres node, asks an OpenAI node for exactly two sentences, normalizes the response, then runs a Code-node guardrail: length 80–500, exactly two sentence terminators, no URL, no `[placeholder]` or `{{template}}`. An IF node routes passing drafts to Slack for a human approval reply; failures go to a hold branch and never reach Slack. The workflow does not auto-send. Credentials and the Slack channel are placeholders because the harness must not embed secrets.
 
+## 6c. Reverse ETL (CRM sync simulation)
+
+[`scripts/sync_to_crm.py`](../scripts/sync_to_crm.py) is a local simulation, not a live CRM integration. It reads `marts.mart_sales_queue` where `fit_score >= 80`, matches `mock_crm_records.json` on `account_id`, and emits only creates and score changes. Unchanged accounts emit nothing; CRM-only records are ignored so the sync never deletes.
+
+The idempotency key is a SHA-256 of `account_id` plus the desired fields (name, score, rank, territory, intent, confidence). Retrying the same desired state produces the same key even though `sync_timestamp` changes. With the committed mock: 361 priority accounts, 358 creates, 1 update, 2 unchanged, 1 CRM-only ignored, 359 payloads. Two runs with the same fixed timestamp were byte-identical.
+
+Production would add OAuth/secrets, a real CRM client, batching, rate limits, retries with a dead-letter path, and an audit log. The point of the simulation is the boundary: the warehouse computes the desired state; the edge computes the diff and performs idempotent upserts.
+
 ## 7. Incremental strategy
 
 `fct_lifecycle_event` is incremental with `delete+insert` on `unique_key='event_id'` and `on_schema_change='append_new_columns'`.
