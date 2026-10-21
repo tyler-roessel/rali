@@ -7,3 +7,4 @@ logs/
 *.parquet
 __pycache__/
 .DS_Store
+.user.yml
