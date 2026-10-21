@@ -151,14 +151,14 @@ The score is a 0–100 rubric. Each component is a column-level fact that a revi
 |---|---:|---|
 | Independent (not a chain) | +25 | The sales motion targets operator-led accounts; chains have central procurement |
 | Has a website | +15 | A working web presence is a precondition for the digital-ordering conversation |
-| Has first-party online ordering | +15 | The account already buys the category; the pitch is consolidation, not education |
+| Has an online-ordering fragment | +15 | A detected ordering path warrants a manual stack review; the fragment does not prove ownership or buying intent |
 | Has reservations | +10 | Reservation demand signals a full-service operation with covers to protect |
 | Cuisine in the high-fit set | +15 | Full-service cuisines where direct ordering and reservations matter more than at a counter |
 | Has a business phone | +10 | A reachable operator is a qualifying signal, not a rich one |
-| Delivery-marketplace-only | +10 | Marketplace dependence is the pain hypothesis: high commission, no first-party relationship |
+| Delivery fragment without an ordering match | +10 | A direct-ordering discovery question; a missed homepage fragment does not prove absence |
 | **Theoretical maximum** | **100** | Practical maximum is 90; ordering and delivery-only are mutually exclusive |
 
-**Delivery-marketplace-only** is `has_delivery and not has_online_ordering`: at least one DoorDash/Uber Eats/Grubhub/Postmates/Caviar fragment and no first-party ordering fragment. It is mutually exclusive with the first-party ordering component. That means the practical maximum is **90**, not 100 (25 + 15 + 15 + 10 + 15 + 10 + 0). The `least(100, ...)` cap remains in the SQL, but no account can reach 100. This is intentional: the rubric does not double-count the same ordering pain. A reviewer who expects a 100-point scale should read 90 as the top of the achievable range.
+The legacy `delivery_marketplace_only` flag is `has_delivery and not has_online_ordering`: at least one DoorDash/Uber Eats/Grubhub/Postmates/Caviar fragment and no ordering fragment found on the homepage. Its name is stronger than the evidence; it is a scan category, not proof of exclusive marketplace dependence. It is mutually exclusive with the ordering component. That means the practical maximum is **90**, not 100 (25 + 15 + 15 + 10 + 15 + 10 + 0). The `least(100, ...)` cap remains in the SQL, but no account can reach 100. The rubric avoids double-counting these two fragment categories. A reviewer who expects a 100-point scale should read 90 as the top of the achievable range.
 
 The high-fit cuisine set is a seed in [`seeds/cuisine_fit_lookup.csv`](../seeds/cuisine_fit_lookup.csv): full-service and direct-ordering cuisines are `true`; counter/retail categories such as fast food, dessert, bakery, juice, and food court are `false`. It is a hypothesis about where the product fits, not a finding. Tiers: 80–100 priority, 60–79 nurture, below 60 low.
 
@@ -172,7 +172,7 @@ The score is not a propensity model and is not trained on outcomes. It is a prio
 
 `dim_account` has 2,644 rows. Fit-score bands: **361 priority** (80–90), **815 nurture** (60–79), **1,468 low** (<60). The practical maximum is 90, not 100, because first-party ordering and delivery-marketplace-only cannot both be true.
 
-`mart_sales_queue` has **2,638 independent accounts** (chains excluded). Intent distribution: 1,072 no web signal, 784 web presence without ordering, 561 first-party ordering, 121 delivery-marketplace-dependent, 100 reservation-led. Signal coverage is **37.2% confirmed** (982 of 2,638). The queue is ranked by fit_score; 361 accounts are in the priority band. The top of the queue is not a shortlist — it is a complete ranked market, intended to be filtered by band, territory, or confidence.
+`mart_sales_queue` has **2,638 independent accounts** (chains excluded). In the recorded build, the observed-capability categories were: 1,072 website not recorded, 784 website recorded with capability unknown, 561 ordering fragments, 121 delivery fragments without an ordering match, and 100 reservation fragments. Signal coverage was **37.2% confirmed** (982 of 2,638). These category names have since been clarified in SQL; counts need a fresh build to reconfirm. The queue is ranked by fit_score; 361 accounts are in the priority band. The top of the queue is not a shortlist — it is a complete ranked market, intended to be filtered by band, territory, or confidence.
 
 `mart_cs_queue` has **94 rows**, one per onboarded account. **23 are flagged at risk**: 4 support-medium accounts, 4 renewal-high accounts (all onboarded-never-ordered), and 15 additional low-adoption onboarding-recovery accounts. The 4 renewal-high accounts are a subset of the 19 onboarded-never-ordered accounts, so the union is 23. There are also 49 expansion-review accounts, 22 quarterly-business-review accounts, 4 support check-ins, and 4 renewal-save plays. The queue's signal coverage is **37.2% confirmed** (35 of 94). The small queue is expected: 94 of 2,644 accounts onboarded, which is 3.6% of the account base.
 
@@ -202,7 +202,7 @@ The score is not a propensity model and is not trained on outcomes. It is a prio
 
 [`scripts/sync_to_crm.py`](../scripts/sync_to_crm.py) is a local simulation, not a live CRM integration. It reads `marts.mart_sales_queue` where `fit_score >= 80`, matches `mock_crm_records.json` on `account_id`, and emits creates or updates when any desired field differs or is missing from the mock record. Unchanged accounts emit nothing; CRM-only records are ignored so the sync never deletes.
 
-The idempotency key is a SHA-256 of `account_id` plus the desired fields (name, score, rank, territory, intent, confidence). Retrying the same desired state produces the same key even though `sync_timestamp` changes. With the committed mock: 361 priority accounts, 358 creates, 3 updates, 0 unchanged, 1 CRM-only ignored, 361 payloads. The three existing records are missing fields that the sync writes; Asadito also has a changed fit score. Two runs with the same fixed timestamp produce byte-identical payloads.
+The idempotency key is a SHA-256 of `account_id` plus the desired fields (name, score, rank, territory, observed capability, confidence). Retrying the same desired state produces the same key even though `sync_timestamp` changes. The previous recorded build yielded 361 priority accounts, 358 creates, 3 updates, 0 unchanged, 1 CRM-only ignored, 361 payloads. The three existing records were missing fields that the sync writes; Asadito also had a changed fit score. The clarified field name and values need a fresh warehouse build before those counts are reconfirmed. Two runs with the same fixed timestamp produce byte-identical payloads.
 
 Production would add OAuth/secrets, a real CRM client, batching, rate limits, retries with a dead-letter path, and an audit log. The point of the simulation is the boundary: the warehouse computes the desired state; the edge computes the diff and performs idempotent upserts.
 

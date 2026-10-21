@@ -117,7 +117,8 @@ models:
     description: >
       Ranked independent-account sales queue. signal_confidence and
       failure_class are top-level so a reviewer sorting by fit_score sees the
-      evidence state inline.
+      evidence state inline. observed_capability describes a homepage clue,
+      never purchase intent or proof that an absent feature does not exist.
     columns:
       - name: account_id
         description: "Account key."
@@ -144,6 +145,13 @@ models:
           - accepted_values:
               arguments:
                 values: ["confirmed", "unknown_no_match", "unknown_unreachable"]
+      - name: observed_capability
+        description: "Homepage-fragment category or unknown; not buying intent."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["ordering_fragment_observed", "delivery_fragment_without_ordering_match", "reservation_fragment_observed", "website_recorded_capability_unknown", "website_not_recorded"]
       - name: signal_coverage_pct
         description: "Share of this queue with confirmed homepage signals, repeated per row."
         tests:
@@ -152,6 +160,37 @@ models:
               arguments:
                 min_value: 0
                 max_value: 100
+
+  - name: mart_rep_research_queue
+    description: >
+      Additive research view over the Chicago sales queue. Evidence fragments,
+      possible shared-domain groups, hypotheses, and mock CRM review state are
+      kept distinct. No row is authorized for automated outreach.
+    columns:
+      - name: account_id
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('mart_sales_queue')
+                field: account_id
+      - name: queue_rank
+        tests:
+          - unique
+          - not_null
+      - name: demo_crm_review_state
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["demo_identity_review", "matched_in_demo_crm", "not_matched_in_demo_crm"]
+      - name: outreach_ready
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [false]
 
   - name: mart_cs_queue
     description: >

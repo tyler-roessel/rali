@@ -8,7 +8,7 @@
       "account_name": "5 Rabanitos",
       "fit_score": 90,
       "territory": "Chicago South",
-      "intent_signal": "first_party_ordering",
+      "observed_capability": "ordering_fragment_observed",
       "last_synced_at": "2026-09-15T12:00:00Z"
     },
     {
@@ -17,7 +17,7 @@
       "account_name": "Andros Taverna",
       "fit_score": 90,
       "territory": "Chicago Northwest",
-      "intent_signal": "first_party_ordering",
+      "observed_capability": "ordering_fragment_observed",
       "last_synced_at": "2026-09-15T12:00:00Z"
     },
     {
@@ -26,7 +26,7 @@
       "account_name": "Asadito",
       "fit_score": 70,
       "territory": "Chicago Downtown",
-      "intent_signal": "first_party_ordering",
+      "observed_capability": "ordering_fragment_observed",
       "last_synced_at": "2026-08-01T12:00:00Z"
     },
     {
@@ -35,7 +35,7 @@
       "account_name": "Closed Location (CRM only)",
       "fit_score": 85,
       "territory": "Unknown",
-      "intent_signal": "no_web_signal",
+      "observed_capability": "website_not_recorded",
       "last_synced_at": "2026-07-01T12:00:00Z"
     }
   ]

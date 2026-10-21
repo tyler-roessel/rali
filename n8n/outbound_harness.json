@@ -19,7 +19,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT \"rank\", account_name, territory, fit_score, intent_signal, suggested_action, signal_confidence\nFROM marts.mart_sales_queue\nORDER BY \"rank\"\nLIMIT 1;",
+        "query": "SELECT \"rank\", account_name, territory, fit_score, observed_capability, suggested_action, signal_confidence\nFROM marts.mart_sales_queue\nORDER BY \"rank\"\nLIMIT 1;",
         "options": {}
       },
       "id": "8b62f8b7-5cf3-4417-ad0f-2594f39904c0",
@@ -46,7 +46,7 @@
               "role": "system"
             },
             {
-              "content": "=Account: {{ $json.account_name }}\nTerritory: {{ $json.territory }}\nFit score: {{ $json.fit_score }}\nIntent: {{ $json.intent_signal }}\nSuggested action: {{ $json.suggested_action }}\n\nWrite exactly two sentences of outbound copy to the operator. Do not include a URL, placeholder, or claim about results.",
+              "content": "=Account: {{ $json.account_name }}\nTerritory: {{ $json.territory }}\nDemo fit score: {{ $json.fit_score }}\nHomepage clue: {{ $json.observed_capability }}\nSignal confidence: {{ $json.signal_confidence }}\nResearch step: {{ $json.suggested_action }}\n\nWrite exactly two sentences of draft outbound copy to the operator. Treat the clue as a research hypothesis, not buying intent or proven pain. Do not claim the restaurant lacks a capability, wants to buy, or is a Popmenu customer. Do not include a URL, placeholder, or claim about results.",
               "role": "user"
             }
           ]

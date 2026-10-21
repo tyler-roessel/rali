@@ -25,19 +25,19 @@ select
     fit_score,
     fit_score_band,
     case
-        when has_online_ordering then 'first_party_ordering'
-        when delivery_marketplace_only then 'delivery_marketplace_dependent'
-        when has_reservations then 'reservation_led'
-        when has_website then 'web_presence_no_ordering'
-        else 'no_web_signal'
-    end as intent_signal,
+        when has_online_ordering then 'ordering_fragment_observed'
+        when delivery_marketplace_only then 'delivery_fragment_without_ordering_match'
+        when has_reservations then 'reservation_fragment_observed'
+        when has_website then 'website_recorded_capability_unknown'
+        else 'website_not_recorded'
+    end as observed_capability,
     rank,
     case
-        when delivery_marketplace_only then 'Displace marketplace: pitch commission savings'
-        when fit_score >= 80 and has_online_ordering then 'Expand: consolidate ordering'
-        when fit_score >= 80 then 'Priority demo: pitch direct ordering'
-        when fit_score >= 60 then 'Nurture: qualify the operator'
-        else 'Monitor: low fit'
+        when delivery_marketplace_only then 'Verify direct-order flow and CRM status; discuss guest ownership if relevant'
+        when has_online_ordering then 'Review ordering and marketing stack; explore consolidation if relevant'
+        when has_reservations then 'Review discovery-to-reservation and guest-marketing workflow'
+        when has_website then 'Review menu visibility and guest-contact capture'
+        else 'Verify website and account identity before outreach'
     end as suggested_action,
     signal_confidence,
     failure_class,

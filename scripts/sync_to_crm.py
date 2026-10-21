@@ -51,7 +51,7 @@ def load_warehouse(min_fit_score: int) -> list[dict[str, Any]]:
                        rank as queue_rank,
                        fit_score,
                        territory,
-                       intent_signal,
+                       observed_capability,
                        signal_confidence
                 from marts.mart_sales_queue
                 where fit_score >= %s
@@ -82,7 +82,7 @@ def desired_fields(row: dict[str, Any]) -> dict[str, Any]:
         "fit_score": int(row["fit_score"]),
         "queue_rank": int(row["queue_rank"]),
         "territory": row["territory"],
-        "intent_signal": row["intent_signal"],
+        "observed_capability": row["observed_capability"],
         "signal_confidence": row["signal_confidence"],
     }
 

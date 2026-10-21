@@ -20,6 +20,7 @@ RALI models a restaurant-tech go-to-market and customer-success motion from pros
 - **A reverse-ETL sync simulation** that diffs the warehouse against a mock CRM and emits idempotent create/update payloads.
 - **A CRM identity-resolution waterfall** with exact domain, exact phone+address, and fuzzy name+geo matching; sub-95% candidates are flagged for human review.
 - **A rules-based fit score** that can be explained in one paragraph without opening the code.
+- **A rep research view** that separates homepage clues, product hypotheses, possible shared-domain groups, and CRM checks. [ICP scope and workflow](docs/popmenu_icp.md).
 - **Monitoring and tests** that answer "how would I know it broke?" rather than only "does it run?"
 
 ## Source scope
@@ -38,6 +39,7 @@ The account universe is Chicago full-service restaurants: `amenity=restaurant` i
 
 - `dim_account` — 2,644 accounts, fit score 0–90 (the practical max is 90 because ordering and delivery-only are mutually exclusive).
 - `mart_sales_queue` — 2,638 independent accounts ranked by fit; 361 priority, 815 nurture, 1,462 low.
+- `mart_rep_research_queue` — additive view with evidence, research prompts, possible multi-location groups, and a closed outreach gate. It needs a fresh dbt build and is not included in the recorded counts above.
 - `mart_cs_queue` — 94 onboarded accounts; 23 at risk, 49 expansion reviews, 4 support check-ins, 4 renewal saves.
 - `mart_handoff_exceptions` — closed-won accounts missing onboarding, with a demo owner assignment and a stable notification key. The committed events imply 17 live exceptions and one in the 200-account sample; this addition has not yet been included in a recorded dbt build.
 - `funnel_summary` — 925 → 370 → 111 → 94 → 75 → 53 across the six raw stages.
