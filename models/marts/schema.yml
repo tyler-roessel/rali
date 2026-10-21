@@ -115,7 +115,7 @@ models:
 
   - name: mart_sales_queue
     description: >
-      Popmenu-facing ranked independent-account queue. signal_confidence and
+      Ranked independent-account sales queue. signal_confidence and
       failure_class are top-level so a reviewer sorting by fit_score sees the
       evidence state inline.
     columns:
@@ -155,7 +155,7 @@ models:
 
   - name: mart_cs_queue
     description: >
-      Upserve-facing customer-success queue. One row per onboarded account.
+      Customer-success queue. One row per onboarded account.
       signal_confidence and failure_class are top-level; signal_coverage_pct is
       the queue's confirmed-signal share repeated per row.
     columns:

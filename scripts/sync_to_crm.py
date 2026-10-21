@@ -9,8 +9,8 @@ records.
 Diff rules:
 * account_id is the natural key.
 * A warehouse account missing from the mock CRM is a create.
-* An existing account with a different fit_score is an update.
-* Same fit_score is unchanged and emits no payload.
+* An existing account with any different desired field is an update.
+* An existing account with all desired fields equal is unchanged.
 * CRM-only records are ignored (no destructive sync).
 
 The idempotency_key is a deterministic hash of account_id + desired fields, so
@@ -87,6 +87,15 @@ def desired_fields(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def field_changes(row: dict[str, Any], existing: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Return differences for every field written to the mock CRM."""
+    return {
+        name: {"previous": existing.get(name), "new": value}
+        for name, value in desired_fields(row).items()
+        if name not in existing or existing[name] != value
+    }
+
+
 def build_payload(
     row: dict[str, Any],
     operation: str,
@@ -109,10 +118,7 @@ def build_payload(
         "idempotency_key": hashlib.sha256(key_material.encode("utf-8")).hexdigest(),
     }
     if existing is not None:
-        payload["change"] = {
-            "previous_fit_score": existing.get("fit_score"),
-            "new_fit_score": fields["fit_score"],
-        }
+        payload["change"] = field_changes(row, existing)
     return payload
 
 
@@ -164,7 +170,7 @@ def main() -> int:
         existing = crm_by_id.get(account_id)
         if existing is None:
             new_rows.append(row)
-        elif existing.get("fit_score") is None or float(existing["fit_score"]) != float(row["fit_score"]):
+        elif field_changes(row, existing):
             changed_rows.append((row, existing))
         else:
             unchanged += 1

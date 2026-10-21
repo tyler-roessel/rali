@@ -1,10 +1,10 @@
 # Decisions
 
-This file records the choices that a reviewer is most likely to question. It is written to be read without the code open. Where a choice departs from the handoff spec, the departure and the reason are called out explicitly.
+This file records the project's design choices and their tradeoffs so the decisions can be understood without the code open.
 
 ## 1. Why Supabase Postgres, and why this connection topology
 
-The project could run on a local DuckDB file. It runs on Supabase instead for three reasons: the warehouse is linkable from a reviewer's browser, it exercises hosted-Postgres operations (schemas, roles, connection pooling, DDL) rather than a single-user file, and Popmenu's stack is PostgreSQL. The alignment is a side benefit, not the reason the modeling is interesting.
+The project could run on a local DuckDB file. It runs on Supabase instead to exercise hosted-Postgres operations (schemas, roles, connection pooling, DDL). Those operational choices matter when data models need to feed sales and customer-success workflows beyond a single-user file.
 
 The connection uses the **session pooler on port 5432**:
 
@@ -200,9 +200,9 @@ The score is not a propensity model and is not trained on outcomes. It is a prio
 
 ## 6c. Reverse ETL (CRM sync simulation)
 
-[`scripts/sync_to_crm.py`](../scripts/sync_to_crm.py) is a local simulation, not a live CRM integration. It reads `marts.mart_sales_queue` where `fit_score >= 80`, matches `mock_crm_records.json` on `account_id`, and emits only creates and score changes. Unchanged accounts emit nothing; CRM-only records are ignored so the sync never deletes.
+[`scripts/sync_to_crm.py`](../scripts/sync_to_crm.py) is a local simulation, not a live CRM integration. It reads `marts.mart_sales_queue` where `fit_score >= 80`, matches `mock_crm_records.json` on `account_id`, and emits creates or updates when any desired field differs or is missing from the mock record. Unchanged accounts emit nothing; CRM-only records are ignored so the sync never deletes.
 
-The idempotency key is a SHA-256 of `account_id` plus the desired fields (name, score, rank, territory, intent, confidence). Retrying the same desired state produces the same key even though `sync_timestamp` changes. With the committed mock: 361 priority accounts, 358 creates, 1 update, 2 unchanged, 1 CRM-only ignored, 359 payloads. Two runs with the same fixed timestamp were byte-identical.
+The idempotency key is a SHA-256 of `account_id` plus the desired fields (name, score, rank, territory, intent, confidence). Retrying the same desired state produces the same key even though `sync_timestamp` changes. With the committed mock: 361 priority accounts, 358 creates, 3 updates, 0 unchanged, 1 CRM-only ignored, 361 payloads. The three existing records are missing fields that the sync writes; Asadito also has a changed fit score. Two runs with the same fixed timestamp produce byte-identical payloads.
 
 Production would add OAuth/secrets, a real CRM client, batching, rate limits, retries with a dead-letter path, and an audit log. The point of the simulation is the boundary: the warehouse computes the desired state; the edge computes the diff and performs idempotent upserts.
 
@@ -260,7 +260,7 @@ The remaining honest caveats are the dedup rate/recall (0.38%, unmeasured recall
 
 - **OSM primary key.** OSM IDs are unique per element type, not globally: node `123` and way `123` can both exist in the same extract. The spec's `PRIMARY KEY (osm_id)` would reject a legitimate record. The implementation uses a composite key / `osm_uid` (`osm_type || ':' || osm_id`) and keeps `osm_id` as a bigint for traceability. This is a correctness fix, flagged rather than silently applied.
 - **Direct connection fallback.** The project does not implement one. If the session pooler is unreachable, the correct response is to fix the network or the pooler setting, not to fall back to an IPv6-only host that will fail intermittently.
-- **Volume gate.** If the bbox returns more than 2,000 elements, Phase 1 stops and reports the count rather than truncating. The reviewer approved loading all 2,654 post-filter records for this run: the cap was a scope heuristic, and a complete bbox is a stronger claim than a sample. A deterministic geographic sub-sample remains the fallback if the scope is ever narrowed.
+- **Volume gate.** If the bbox returns more than 2,000 elements, Phase 1 stops and reports the count rather than truncating. All 2,654 post-filter records were loaded for this run after reviewing the scope: the cap was a heuristic, and a complete bbox is a stronger claim than a sample. A deterministic geographic sub-sample remains the fallback if the scope is ever narrowed.
 - **Phase 3 fetch cap.** The domain cap is 2,000, not 1,000. At roughly 2,650 accounts with a 60–70% website rate, the expected domain count is 1,600–1,850; the exact count is reported at the Phase 3 gate before any fetches start. Fetches are sequential with a polite delay, so a one-time run is roughly an hour.
 - **Overpass endpoint.** The primary `overpass-api.de` interpreter returned HTTP 502 on the first full request. The extractor accepts an `OVERPASS_URL` override so a public mirror can be used without changing the query. The gate report names the endpoint used; the data is OpenStreetMap either way.
 - **Fit-score practical maximum is 90.** The spec's weights sum to 100, but first-party ordering and delivery-marketplace-only are mutually exclusive. The rubric keeps the exact weights and the 100 cap; no account can score above 90. This is documented in the table and the one-paragraph explanation.
