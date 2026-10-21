@@ -1,0 +1,114 @@
+{
+  "name": "RALI Sales-to-CX handoff alert (inactive demo)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## RALI handoff alert\n\nManual demo over synthetic lifecycle events. Build the dbt mart, then run sql/01_handoff_notification_log.sql and sql/02_handoff_owner_directory.sql. Configure Postgres and Slack in n8n, and populate the owner directory privately. Each manual run selects at most one unlogged exception. Review the message before enabling. If Slack succeeds but the log write fails, inspect Slack before retrying to avoid a duplicate.",
+        "height": 360,
+        "width": 440
+      },
+      "id": "a93d2a50-e2f6-4c95-9a46-9847815ed451",
+      "name": "Setup notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-500, -220]
+    },
+    {
+      "parameters": {},
+      "id": "e07b17f8-0acc-4e5c-8b13-bf26a61d64fb",
+      "name": "Manual trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT e.account_id, e.account_name, e.territory, e.owner_key, e.closed_won_at, e.exception_type, e.source_system, e.notification_key, e.next_action, owner.recipient_ref\nFROM marts.mart_handoff_exceptions e\nJOIN raw.handoff_owner_directory owner ON e.owner_key = owner.owner_key\nLEFT JOIN raw.handoff_notification_log sent ON e.notification_key = sent.notification_key\nWHERE sent.notification_key IS NULL AND e.handoff_due_at <= current_timestamp\nORDER BY e.closed_won_at, e.account_id\nLIMIT 1;",
+        "options": {}
+      },
+      "id": "2230a64e-0328-444d-b054-7ca8316df390",
+      "name": "Get one unnotified handoff",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [250, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const row = item.json;\n  const ready_to_notify = row.source_system === 'synthetic'\n    && /^U[A-Z0-9]{8,}$/.test(String(row.recipient_ref || ''))\n    && /^[a-f0-9]{32}$/.test(String(row.notification_key || ''));\n  return { json: { ...row, ready_to_notify } };\n});"
+      },
+      "id": "215f96da-bf66-492b-9e1a-9ec05432ea22",
+      "name": "Check recipient and event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+          "conditions": [
+            {"id": "recipient-ready", "leftValue": "={{ $json.ready_to_notify }}", "rightValue": "", "operator": {"type": "boolean", "operation": "true", "singleValue": true}}
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "45b909a3-e500-4dd8-968d-905c950d7ea4",
+      "name": "Ready to notify?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [750, 0]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {"__rl": true, "value": "={{ $json.recipient_ref }}", "mode": "id"},
+        "text": "=RALI DEMO — synthetic Sales-to-CX handoff exception\n\n{{ $json.account_name }} ({{ $json.territory }}) has a closed-won event from {{ $json.closed_won_at }} but no onboarding event.\n\nNext action: {{ $json.next_action }}.\nAccount ID: {{ $json.account_id }}\nNotification key: {{ $json.notification_key }}\n\nThis is generated sample lifecycle data, not a real customer alert.",
+        "otherOptions": {}
+      },
+      "id": "e8865829-fd50-4644-9fb0-e4867d03fb1e",
+      "name": "Notify assigned CX owner",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [1000, -100]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO raw.handoff_notification_log (notification_key, account_id, owner_key, slack_user_id, slack_message_ts)\nVALUES ($1, $2::uuid, $3, $4, $5)\nON CONFLICT (notification_key) DO NOTHING;",
+        "options": {
+          "queryReplacement": "={{ $('Check recipient and event').first().json.notification_key }},{{ $('Check recipient and event').first().json.account_id }},{{ $('Check recipient and event').first().json.owner_key }},{{ $('Check recipient and event').first().json.recipient_ref }},{{ $json.ts }}"
+        }
+      },
+      "id": "1fb849cb-719e-49fd-af16-29ab06aa4f6b",
+      "name": "Log accepted alert",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1250, -100]
+    },
+    {
+      "parameters": {},
+      "id": "9a28b38f-4893-4360-a65d-122fd3bbf077",
+      "name": "Hold for review",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1000, 140]
+    }
+  ],
+  "connections": {
+    "Manual trigger": {"main": [[{"node": "Get one unnotified handoff", "type": "main", "index": 0}]]},
+    "Get one unnotified handoff": {"main": [[{"node": "Check recipient and event", "type": "main", "index": 0}]]},
+    "Check recipient and event": {"main": [[{"node": "Ready to notify?", "type": "main", "index": 0}]]},
+    "Ready to notify?": {"main": [
+      [{"node": "Notify assigned CX owner", "type": "main", "index": 0}],
+      [{"node": "Hold for review", "type": "main", "index": 0}]
+    ]},
+    "Notify assigned CX owner": {"main": [[{"node": "Log accepted alert", "type": "main", "index": 0}]]}
+  },
+  "settings": {"executionOrder": "v1"},
+  "pinData": {}
+}

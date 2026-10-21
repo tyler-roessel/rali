@@ -16,6 +16,7 @@ RALI models a restaurant-tech go-to-market and customer-success motion from pros
 - **Synthetic lifecycle generation** that is deterministic and deliberately messy, with the mess documented rather than hidden.
 - **dbt marts** for a sales queue, a customer-success queue, a CRM lifecycle funnel, a raw-event funnel, and per-account health.
 - **An n8n approval harness** that drafts one outbound message and blocks it at a human Slack approval step.
+- **A Sales-to-CX exception queue** with territory routing and an inactive workflow for internal handoff alerts.
 - **A reverse-ETL sync simulation** that diffs the warehouse against a mock CRM and emits idempotent create/update payloads.
 - **A CRM identity-resolution waterfall** with exact domain, exact phone+address, and fuzzy name+geo matching; sub-95% candidates are flagged for human review.
 - **A rules-based fit score** that can be explained in one paragraph without opening the code.
@@ -38,6 +39,7 @@ The account universe is Chicago full-service restaurants: `amenity=restaurant` i
 - `dim_account` — 2,644 accounts, fit score 0–90 (the practical max is 90 because ordering and delivery-only are mutually exclusive).
 - `mart_sales_queue` — 2,638 independent accounts ranked by fit; 361 priority, 815 nurture, 1,462 low.
 - `mart_cs_queue` — 94 onboarded accounts; 23 at risk, 49 expansion reviews, 4 support check-ins, 4 renewal saves.
+- `mart_handoff_exceptions` — closed-won accounts missing onboarding, with a demo owner assignment and a stable notification key. The committed events imply 17 live exceptions and one in the 200-account sample; this addition has not yet been included in a recorded dbt build.
 - `funnel_summary` — 925 → 370 → 111 → 94 → 75 → 53 across the six raw stages.
 - `mart_lifecycle_funnel` — CRM stages Lead 925 → SQL 370 → Opportunity 111 → Customer 94 → Active 75, with stage conversion and median days.
 - `crm_identity_map` — 2,644 accounts; 6 matched (2 exact domain, 1 exact phone+address, 3 fuzzy), 3 flagged for human review, 1 CRM-only record ignored.
@@ -47,6 +49,10 @@ Both queues expose `signal_confidence`, `failure_class`, and `signal_coverage_pc
 ## Outbound approval harness (n8n)
 
 [`n8n/outbound_harness.json`](n8n/outbound_harness.json) is an inactive, importable workflow: Postgres pulls one row from `mart_sales_queue`, an OpenAI node drafts exactly two sentences, a Code guardrail checks length (80–500), sentence count (exactly 2), URLs, and placeholders, and an IF node routes the draft to Slack for a human approval reply. Failed drafts go to a hold branch and never reach Slack. The workflow does not auto-send; approval is a human action. Import it, set the Postgres/OpenAI/Slack credentials, and replace the `#sales-approvals` channel placeholder.
+
+## Sales-to-CX handoff alerts
+
+The CS queue begins after onboarding, so it cannot surface a closed-won account that never reaches that stage. [`mart_handoff_exceptions`](models/marts/mart_handoff_exceptions.sql) lists those accounts and assigns a demo CX owner by territory. The inactive [`n8n/handoff_alerts.json`](n8n/handoff_alerts.json) template can notify that person internally after private recipient mapping is configured. It logs accepted alerts to avoid ordinary duplicate runs; it does not contact restaurants. [Setup and limits](docs/handoff_alerts.md).
 
 ## Operationalizing the Warehouse (Reverse ETL)
 
@@ -177,7 +183,7 @@ dotenv run -- dbt seed --profiles-dir . --full-refresh
 dotenv run -- dbt build --profiles-dir . --full-refresh --vars '{use_sample_data: true}'
 ```
 
-Verified on the committed seeds: 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, a 200-row identity map, and 167/167 tests with zero warnings. The run is captured in [`docs/sample_build_output.txt`](docs/sample_build_output.txt). A Postgres target is still required (dbt seeds into it), but the live raw tables are not. Use `--full-refresh` when the target already contains live marts so the incremental event fact is replaced rather than merged.
+The recorded build before the handoff-alert addition verified 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, a 200-row identity map, and 167/167 tests with zero warnings. That run is captured in [`docs/sample_build_output.txt`](docs/sample_build_output.txt). A Postgres target is still required (dbt seeds into it), but the live raw tables are not. Use `--full-refresh` when the target already contains live marts so the incremental event fact is replaced rather than merged. The new handoff model and test need a fresh build before those results can be updated.
 
 ## Monitoring
 

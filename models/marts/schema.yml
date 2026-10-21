@@ -207,6 +207,39 @@ models:
                 min_value: 0
                 max_value: 100
 
+  - name: mart_handoff_exceptions
+    description: >
+      Synthetic closed-won accounts with no onboarding event. Territory maps
+      to a demo CX owner key; no real employee or Slack identity is stored.
+    columns:
+      - name: account_id
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_account')
+                field: account_id
+      - name: notification_key
+        tests:
+          - unique
+          - not_null
+      - name: owner_key
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["cx_downtown", "cx_north", "cx_south", "cx_triage"]
+      - name: source_system
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ["synthetic"]
+      - name: closed_won_at
+        tests:
+          - not_null
+
   - name: funnel_summary
     description: >
       Six-stage funnel with raw counts, stage-to-stage conversion and median
