@@ -4,7 +4,7 @@ Restaurant GTM teams need a reliable way to identify accounts, prioritize outrea
 
 **The real/synthetic boundary is the first thing to understand about this project.** Restaurant identity, address, and website signals are extracted from OpenStreetMap and observed public web pages. Everything about the *account lifecycle* — funnel entry, demos, closes, onboarding, orders, support tickets, renewals, health scores, and every date attached to them — is synthetic, generated with `random.seed(42)` and labelled `source_system = 'synthetic'` in the warehouse. No conversion rate, retention number, or revenue implication in this repository describes a real company or a real market.
 
-> **Build status: Dallas run complete (2026-10-21).** `dbt build` passed 197/197 nodes with zero warnings or errors. Measured counts below come from the live Dallas extract and the Supabase warehouse. The committed test log [`docs/dbt_test_output.txt`](docs/dbt_test_output.txt) is from the earlier Chicago pilot; the offline sample path remains a Chicago test fixture.
+> **Build status: Dallas run complete (2026-10-21; log refreshed 2026-10-22).** `dbt build` passed 197/197 nodes with zero warnings or errors. Measured counts below come from the live Dallas extract and the Supabase warehouse. The committed test log [`docs/dbt_test_output.txt`](docs/dbt_test_output.txt) is the Dallas run, and the offline sample fixture is Dallas-derived; the earlier Chicago sample log is retained at [`docs/sample_build_output.txt`](docs/sample_build_output.txt).
 
 RALI models a restaurant-tech go-to-market and customer-success motion from prospect through post-sale lifecycle. It is built as a dbt project on Supabase Postgres, with four warehouse schemas (`raw`, `staging`, `intermediate`, `marts`), identity resolution over messy map data, explainable account scoring, and monitoring checks that are designed to catch the failure modes this kind of pipeline actually has.
 
@@ -178,14 +178,14 @@ dotenv run -- dbt build --profiles-dir .
 
 ### 4. Rebuild without a live warehouse
 
-The repository commits a 200-account sample (210 raw rows, 119 website-signal rows, 123 lifecycle events). `use_sample_data: true` switches the three raw source identifiers to the sample seed tables, so the same staging, dedup, scoring, and mart SQL runs without Overpass or website requests:
+The repository commits a 200-account Dallas sample (204 raw rows, 88 website-signal rows, 123 lifecycle events), drawn deterministically from the live Dallas warehouse. `use_sample_data: true` switches the three raw source identifiers to the sample seed tables, so the same staging, dedup, scoring, and mart SQL runs without Overpass or website requests:
 
 ```bash
 dotenv run -- dbt seed --profiles-dir . --full-refresh
 dotenv run -- dbt build --profiles-dir . --full-refresh --vars '{use_sample_data: true}'
 ```
 
-The earlier recorded build verified 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, a 200-row identity map, and 167/167 tests with zero warnings; its log is [`docs/sample_build_output.txt`](docs/sample_build_output.txt). On October 21, 2026, the full sample build was rerun in an isolated local Postgres database with the pinned dbt 1.12.6 environment: **197/197 nodes passed, including 173 data tests**, with zero warnings or errors. The new research view returned 197 accounts, four rows with a possible shared-domain group, and zero rows ready for outreach. [Verification and DeepSeek handoff](docs/deepseek_handoff_2026-10-21.md). A Postgres target is still required (dbt seeds into it), but live raw tables are not. Run `--full-refresh` only against an isolated test target because it replaces the incremental event fact and other existing target relations. The committed sample seeds remain a 200-account Chicago fixture used to test SQL without network access; they are not the Dallas warehouse.
+On October 22, 2026, the full sample build was rerun in an isolated local Postgres database against the regenerated Dallas fixture with the pinned dbt 1.12.6 environment: **197/197 nodes passed, including 173 data tests**, with zero warnings or errors. The fixture verifies 200 accounts, 204 raw rows, 88 website-signal rows, 123 lifecycle events, a 200-row sales queue, a 7-row CS queue, a 200-row identity map, and a six-stage funnel (70 → 28 → 8 → 7 → 6 → 4). The research view returned 200 accounts, 6 rows with a possible shared-domain group, and zero rows ready for outreach. A Postgres target is still required (dbt seeds into it), but live raw tables are not. Run `--full-refresh` only against an isolated test target because it replaces the incremental event fact and other existing target relations. The committed sample is a Dallas fixture, not a snapshot of the live warehouse; the earlier Chicago sample log remains at [`docs/sample_build_output.txt`](docs/sample_build_output.txt) for history.
 
 ## Monitoring
 

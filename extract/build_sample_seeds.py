@@ -76,7 +76,7 @@ def main() -> None:
     conn = get_conn()
     try:
         accounts = pd.read_sql(
-            "select account_id, dedup_key, name, is_chain from intermediate.int_account_deduped",
+            "select account_id, dedup_key, name, is_chain from marts.dim_account",
             conn,
         )
         clusters = pd.read_sql(
