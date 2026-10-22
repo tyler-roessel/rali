@@ -1,16 +1,16 @@
 # RALI — Restaurant Account Lifecycle Intelligence
 
-Popmenu runs a high-velocity, low-ACV GTM motion: thousands of addressable restaurants per market, a sales cycle typically under 30 days, and Salesforce and Salesloft as the system of record and sequencing layer. RALI is a working demonstration of the data and execution layer that motion needs: a single source of truth for Dallas restaurants, a territory-assigned and fit-scored account model, signal-ranked rep queues, CRM identity resolution, and guarded handoffs into Salesloft and post-sale health. Its matching rules, tests, and failure checks make each output traceable to its inputs.
+RALI is a GTM data warehouse for restaurant markets. Restaurant identity, address, website capability, and CRM state arrive fragmented across public maps, homepage HTML, and internal systems, so the account list a team sells from is rarely the same list the business actually operates. RALI extracts and deduplicates that data into one account model, scores fit and observed capability, and puts reps in front of a prioritized research queue. Identity resolution, outbound guardrails, and post-sale health all read from the same warehouse, so every action traces back to a known account and a recorded piece of evidence.
 
 **The real/synthetic boundary is the first thing to understand about this project.** Restaurant identity, address, and website signals are extracted from OpenStreetMap and observed public web pages. Everything about the *account lifecycle* — funnel entry, demos, closes, onboarding, orders, support tickets, renewals, health scores, and every date attached to them — is synthetic, generated with `random.seed(42)` and labelled `source_system = 'synthetic'` in the warehouse. No conversion rate, retention number, or revenue implication in this repository describes a real company or a real market.
 
 > **Build status: Dallas run complete (2026-10-21; logs refreshed 2026-10-22).** `dbt build` passed 197/197 nodes with zero warnings or errors. Measured counts below come from the live Dallas extract and the Supabase warehouse. The committed test log [`docs/dbt_test_output.txt`](docs/dbt_test_output.txt) is the Dallas run, and the offline sample path is built on a 200-account Dallas fixture.
 
-RALI models a full-funnel restaurant-tech GTM engineering motion from prospect through post-sale lifecycle. It is built as a dbt project on Supabase Postgres, with four warehouse schemas (`raw`, `staging`, `intermediate`, `marts`), identity resolution over inconsistent map data, explainable account scoring, and monitoring checks designed to catch the failure modes this kind of pipeline actually has.
+RALI models a full-funnel restaurant GTM lifecycle from prospect through post-sale. It is built as a dbt project on Supabase Postgres, with four warehouse schemas (`raw`, `staging`, `intermediate`, `marts`), identity resolution over inconsistent map data, explainable account scoring, and monitoring checks designed to catch the failure modes this kind of pipeline actually has.
 
 ## What it demonstrates
 
-- **A signal-ranked rep research queue.** `mart_rep_research_queue` is the primary rep surface: fit, territory, homepage evidence, possible shared-domain groups, mock CRM review state, a use-case hypothesis, a next research step, and a closed `outreach_ready` gate. [ICP scope and workflow](docs/popmenu_icp.md).
+- **A signal-ranked rep research queue.** `mart_rep_research_queue` is the primary rep surface: fit, territory, homepage evidence, possible shared-domain groups, mock CRM review state, a use-case hypothesis, a next research step, and a closed `outreach_ready` gate.
 - **AI guardrails before anything reaches a restaurant.** The inactive [`n8n`](n8n/outbound_harness.json) harness drafts exactly two sentences, checks length, sentence count, URLs, and placeholders, routes failures to a hold branch, and requires human Slack approval; nothing auto-sends.
 - **CRM identity resolution and reverse ETL.** A waterfall (exact domain, exact phone+address, fuzzy name+geo) maps 1,479 accounts to a 50-record mock CRM with 50 matches and zero unflagged low-confidence links; [`scripts/sync_to_crm.py`](scripts/sync_to_crm.py) emits idempotent creates and updates only.
 - **A Salesloft execution handoff.** [`scripts/simulate_salesloft_handoff.py`](scripts/simulate_salesloft_handoff.py) builds a `cadence_membership` payload for `person_id`/`cadence_id` behind the `outreach_ready` gate and never sends.
@@ -22,20 +22,6 @@ RALI models a full-funnel restaurant-tech GTM engineering motion from prospect t
 - **Synthetic lifecycle generation** that is deterministic and deliberately irregular, with those irregularities documented rather than hidden.
 - **A rules-based fit score** that can be explained in one paragraph without opening the code.
 - **Monitoring and tests** that answer "how would I know it broke?" rather than only "does it run?"
-
-## Built for the Popmenu GTM Engineer role
-
-This repo is scoped to the [Popmenu GTM Engineer posting](https://apply.workable.com/popmenu/j/0CC5B68239): a first-build role owning the systems behind a high-velocity, low-ACV motion, with Salesforce and Salesloft as the system of record and sequencing layer.
-
-| JD ask | Where this repo demonstrates it |
-|---|---|
-| A single source of truth for every addressable restaurant, territory-assigned, enriched and scored on fit and intent | Overpass → `raw.osm_restaurants` → `dim_account`: 1,479 Dallas accounts, ZIP-based territory, fit score 0–90, observed capabilities |
-| Put reps in front of prioritized, signal-ranked queues instead of a blank search bar | `mart_sales_queue` (1,477 ranked) and `mart_rep_research_queue` (evidence, hypothesis, next step, closed `outreach_ready` gate) |
-| AI in production with evals, guardrails, and human review before anything reaches a restaurant | n8n harness: two-sentence draft, length/sentence/URL/placeholder checks, hold branch, Slack approval, no auto-send |
-| CRM architecture and connecting two systems with no native integration | `crm_identity_map` waterfall and `sync_to_crm.py` idempotent reverse ETL (84 creates / 20 updates against the Dallas mock) |
-| Salesloft sequencing as the execution layer | `simulate_salesloft_handoff.py` builds the `cadence_membership` payload behind a human gate and never sends |
-| Orchestrate Sales-to-CX handoffs and post-sale health | `mart_handoff_exceptions` plus the `mart_cs_queue` Post-Sale Health module |
-| Measure leverage: hours removed, territory coverage, data accuracy, booked conversations, speed to lead | Monitoring checks, dedup audit, signal-coverage metrics, queue reconciliation, 197 dbt nodes |
 
 ## Source scope
 
