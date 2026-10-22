@@ -44,7 +44,7 @@ The account universe is Dallas full-service restaurants: `amenity=restaurant` in
 - `mart_handoff_exceptions` — 9 closed-won Dallas accounts missing onboarding, with a demo owner assignment and a stable notification key.
 - `funnel_summary` — 518 → 207 → 62 → 53 → 42 → 29 across the six raw stages.
 - `mart_lifecycle_funnel` — CRM stages Lead 518 → SQL 207 → Opportunity 62 → Customer 53 → Active 42, with stage conversion and median days.
-- `crm_identity_map` — 1,479 accounts; 0 matched, because the committed mock CRM and its resolution seed are still the Chicago demo set. No Dallas account is claimed as a CRM match.
+- `crm_identity_map` — 1,479 accounts; 50 matched to the Dallas mock CRM (20 exact domain, 15 exact phone+address, 15 fuzzy name+geo), 0 flagged for human review. The other 1,429 accounts have no CRM candidate.
 
 Both queues expose `signal_confidence`, `failure_class`, and `signal_coverage_pct` as top-level columns. Dallas queue coverage is 26.2% confirmed; the other 73.8% are flagged as unknown rather than silently treated as “no signal.”
 
@@ -72,7 +72,7 @@ python scripts/sync_to_crm.py --limit 5
 python scripts/sync_to_crm.py --sync-timestamp 2026-10-21T12:00:00Z
 ```
 
-Current Dallas result against the committed mock: **134 priority accounts → 134 creates, 0 updates, 0 unchanged, 4 CRM-only ignored, 134 payloads**. The mock records are the Chicago demo set, so they do not match any Dallas `account_id`; that is a fixture limitation, not a Dallas CRM result. Running the same diff twice with a fixed timestamp produces byte-identical payloads and identical idempotency keys.
+Current Dallas result against the committed mock: **134 priority accounts → 134 creates, 0 updates, 0 unchanged, 4 CRM-only ignored, 134 payloads**. That mock (`mock_crm_records.json`) is still the Chicago demo set and is separate from the Dallas identity-resolution seed, so it does not match any Dallas `account_id`; that is a fixture limitation, not a Dallas CRM result. Running the same diff twice with a fixed timestamp produces byte-identical payloads and identical idempotency keys.
 
 The architectural point is that the **warehouse owns the business state** — rank, fit score, territory, intent, confidence — while the sync edge owns only the diff and the API call. The CRM receives idempotent upserts, not a re-send of the whole queue. A production version would add OAuth/secrets, a real CRM client, batching, rate-limit handling, retries with a dead-letter path, and an audit log. This is the "connect two systems with no native integration" pattern without pretending the mock is a real integration.
 
@@ -88,7 +88,7 @@ Matching waterfall:
 
 Any candidate below **95%** is written with `needs_human_review = true`. Unmatched accounts have `match_method = 'unmatched'`, a null `crm_account_id`, and confidence 0; they are not review cases because there is no candidate to review.
 
-Current Dallas result: **1,479 accounts → 0 matched**, all **1,479 unmatched**, zero review candidates, and the 4 Chicago mock records are ignored as CRM-only. The mock CRM and `seeds/crm_identity_resolution.csv` were not regenerated for Dallas, so this section demonstrates the matching mechanics rather than a Dallas CRM state. Unmatched rows are retained in the map rather than dropped; the model exposes `is_matched`.
+Current Dallas result: **1,479 accounts → 50 matched** (20 exact domain, 15 exact phone+address, 15 fuzzy name+geo), **1,429 unmatched**, and **0 flagged for human review**. All 50 mock CRM records are used and there are no CRM-only records. The mock CRM is generated from 50 sampled Dallas accounts by [`scripts/build_dallas_mock_crm.py`](scripts/build_dallas_mock_crm.py), which deliberately spreads records across the three matching branches. Unmatched rows are retained in the map rather than dropped; the model exposes `is_matched`.
 
 Regenerate and build:
 

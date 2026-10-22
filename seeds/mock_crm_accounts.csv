@@ -1,8 +1,51 @@
 crm_account_id,crm_name,domain,phone,address,city,postcode,lat,lon
-crm-2001,5 Rabanitos,5rabanitos.com,,,Chicago,60615,41.799338,-87.594843
-crm-2002,Andros Taverna,androstaverna.com,,,Chicago,60647,41.927298,-87.704872
-crm-2003,Asadito Tacos,,+1-312-929-2657,"30 North Clinton Street, Chicago, 60661",Chicago,60661,41.882683,-87.641470
-crm-2004,Athena Greek Taverna,,,,Chicago,60661,41.878716,-87.647621
-crm-2005,Big Star Tacos,,,,Chicago,60622,41.909500,-87.677500
-crm-2006,Bistronomic Bistro,,,,Chicago,60611,41.897876,-87.627138
-crm-2007,Closed Location,,,,Chicago,60600,41.950000,-87.700000
+crm-dal-001,Zaap Kitchen Lao & Thai Street Eats Inc,zaapkitchen.com,+1 214-613-2710,2325 n fitzhugh ave,,,32.810817,-96.782217
+crm-dal-002,BoomerJack's Grill & Bar LLC,boomerjacks.com,+1-972-288-9464,1200 e davis st mesquite 75149,Mesquite,75149,32.763438,-96.583007
+crm-dal-003,Kuppanna's Thiru Kuppusamy Unavagam LLC,thirukuppusamy.com,+1-817-532-8591,7447 n macarthur blvd irving 75063,Irving,75063,32.907699,-96.960698
+crm-dal-004,Los Primos Tacos & More Inc,losprimostacostx.com,+1-469-372-5535,5012 sharp st,,,32.808655,-96.871438
+crm-dal-005,Love & War in Texas Group,loveandwarintexas.com,+1-972-422-6201,601 e plano parkway plano 75074,Plano,75074,33.009497,-96.706344
+crm-dal-006,Crab Station LLC,crab-station.com,+1 469-941-4083,2813 commerce st dallas 75226,Dallas,75226,32.783520,-96.782615
+crm-dal-007,Sonny Bryan's Smokehouse Inc,sonnybryans.com,+1-972-664-9494,1251 w campbell road richardson 75080,Richardson,75080,32.977693,-96.762385
+crm-dal-008,Brooklyn Pizzeria LLC,orderbrooklynpizzeriadallas.com,+1-972-685-6531,4520 frankford road dallas 75287,Dallas,75287,32.996977,-96.831268
+crm-dal-009,Pho Xpress Co,phoxpress.com,+1-469-763-3299,310 e round grove road,,,33.004042,-96.984312
+crm-dal-010,Ricky's Hot Chicken Group,rickyshotchicken.com,+1-214-272-3735,100 s central expressway richardson 75080,Richardson,75080,32.949066,-96.738306
+crm-dal-011,Cork & Pig Tavern Co,corkandpig.com,+1 972-364-7412,5224 n oconnor blvd irving 75039,Irving,75039,32.869719,-96.939065
+crm-dal-012,Bubba's Cooks Country Group,bubbascookscountry.com,+1 214-373-6527,6617 hillcrest ave dallas 75205,Dallas,75205,32.847421,-96.787126
+crm-dal-013,La Pasha Lounge Inc,lapashalounge.com,,3855 belt line road addison 75001,Addison,75001,32.953587,-96.850579
+crm-dal-014,Banh Mi Station Group,banhmistationdallas.com,+1-972-629-9908,1818 sylvan ave dallas 75208,Dallas,75208,32.768286,-96.835433
+crm-dal-015,Spring Creek Barbeque Group,springcreekbarbeque.com,+1-972-669-0505,270 n central expressway richardson 75080,Richardson,75080,32.952916,-96.732275
+crm-dal-016,III Forks Steakhouse Inc,3forks.com,+19452991776,5100 belt line road dallas 75254,Dallas,75254,32.951804,-96.821000
+crm-dal-017,Frattelo Group,fratellopizza.menufy.com,+1-972-664-1119,201 s greenville ave,,,32.947190,-96.730350
+crm-dal-018,Valentino Chinese Restaurant LLC,valentinodallas.com,+12149424003,428 e jefferson blvd dallas 75203,Dallas,75203,32.745635,-96.817852
+crm-dal-019,XOXO Dining Room Inc,xoxodallas.com,,3121 ross ave,,,32.794070,-96.791039
+crm-dal-020,Yenet Guada Inc,yenatguada.com,+1-214-478-3193,7015 greenville ave,,,32.873834,-96.763560
+crm-dal-021,Yia Yia's House of Gyros Inc,yia-yia-s-house-of-gyros-dallas.com,(469) 802-9797,904 e davis st mesquite 75149,Mesquite,75149,32.765149,-96.587919
+crm-dal-022,Maple & Motor Co,maple-motor-dallas.com,+1-214-522-4400,4810 maple ave dallas 75219,Dallas,75219,32.815211,-96.827071
+crm-dal-023,Babe's Chicken Dinner House Co,babe-s-chicken-dinner-house-dallas.com,(972) 245-7773,1006 w main st carrollton 75006,Carrollton,75006,32.952854,-96.907729
+crm-dal-024,Gloria's Latin Cuisine Group,gloria-s-latin-cuisine-dallas.com,+1-214-874-0088,3715 greenville ave dallas 75206,Dallas,75206,32.832270,-96.770411
+crm-dal-025,Hudson House Inc,hudson-house-dallas.com,(214) 702-5002,4933 belt line road addison 75254,Addison,75254,32.954498,-96.827408
+crm-dal-026,Taco Joint Group,taco-joint-dallas.com,+1-469-443-0559,1300 w plano parkway plano 75075,Plano,75075,33.008258,-96.717510
+crm-dal-027,Jonathon's Diner LLC,jonathon-s-diner-dallas.com,(214) 782-9273,1619 n beckley ave,,,32.764583,-96.823321
+crm-dal-028,Pho Pasteur Inc,pho-pasteur-dallas.com,+1 972 418 8972,1927 e belt line road carrollton 75006,Carrollton,75006,32.955109,-96.888332
+crm-dal-029,Fish Shack LLC,fish-shack-dallas.com,(469) 229-0838,700 e 15th st,,,33.019359,-96.706374
+crm-dal-030,Mama Vicky's Pupusas y Mas Group,mama-vicky-s-pupusas-y-mas-dallas.com,+1-469-430-5326,1112 e 15th st plano 75074,Plano,75074,33.019628,-96.698614
+crm-dal-031,La Hacienda Ranch Co,la-hacienda-ranch-dallas.com,(972) 248-2424,17390 preston road dallas 75252,Dallas,75252,32.989651,-96.801453
+crm-dal-032,Talk Jhal Eatery Bangladesh Group,talk-jhal-eatery-bangladesh-dallas.com,+1-609-232-2681,809 s macarthur blvd coppell 75019,Coppell,75019,32.952375,-96.959179
+crm-dal-033,Yama Izakaya & Sushi LLC,yama-izakaya-sushi-dallas.com,(972) 242-8397,2625 old denton road carrollton 75007,Carrollton,75007,32.984422,-96.911095
+crm-dal-034,Rodeo Goat Inc,rodeo-goat-dallas.com,+1-214-741-4628,1926 market center blvd 75207,,75207,32.797186,-96.823882
+crm-dal-035,Milagro Tacos Cantina Group,milagro-tacos-cantina-dallas.com,(469) 872-0168,440 singleton blvd dallas 75212 4103,Dallas,75212-4103,32.778383,-96.831654
+crm-dal-036,Whiskey Cake LLC,,,,,,32.920560,-96.986695
+crm-dal-037,Kalachandji's Inc,,,,Richardson,,32.986730,-96.749211
+crm-dal-038,Petra and the Beast Inc,,,,,,32.792118,-96.775073
+crm-dal-039,Soprano’s Pizza & Pasta Inc,,,5148 n jupiter road,,,32.962783,-96.682189
+crm-dal-040,Sushi Robata LLC,,,,,,32.999368,-96.826273
+crm-dal-041,Namak Inc,,,,,,32.853307,-96.768516
+crm-dal-042,Y.O. Ranch Steakhouse LLC,,,,,,32.781306,-96.806449
+crm-dal-043,El Rincon de D.F. LLC,,,,,,32.880125,-96.880407
+crm-dal-044,Tortas las Tortugas Inc,,,235 centre st,,,32.742461,-96.825956
+crm-dal-045,Zio Al’s Pizza & Pasta Inc,,,150 w main st,,,32.949964,-96.732881
+crm-dal-046,Leonardo's Inc,,,13838 c f hawn freeway dallas 75253,Dallas,75253,32.673748,-96.598668
+crm-dal-047,Haywire Inc,,,,,,32.790325,-96.803337
+crm-dal-048,Master Wok LLC,,,,,,33.005821,-96.681488
+crm-dal-049,Sushi Kushi LLC,,,2680 old denton road carrollton 75007,Carrollton,75007,32.987243,-96.909116
+crm-dal-050,Tejano BBQ & More Inc,,,17509 coit road dallas 75252,Dallas,75252,32.989124,-96.768761
