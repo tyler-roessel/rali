@@ -12,7 +12,7 @@ sources:
       - name: osm_restaurants
         identifier: "{{ 'raw_accounts_sample' if var('use_sample_data', false) else 'osm_restaurants' }}"
         description: >
-          One row per OSM node or way tagged amenity=restaurant in the Chicago
+          One row per OSM node or way tagged amenity=restaurant in the Dallas
           bbox, with a non-empty name and no brand/brand:wikidata tag.
         columns:
           - name: osm_uid

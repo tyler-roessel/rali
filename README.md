@@ -1,17 +1,17 @@
 # RALI — Restaurant Account Lifecycle Intelligence
 
-Restaurant GTM teams need a reliable way to identify accounts, prioritize outreach, and see what happens after a sale. RALI turns public Chicago restaurant records and website signals into a deduplicated account model and sales queue, then uses clearly labelled synthetic lifecycle events to exercise onboarding, adoption, renewal, and customer-success reporting. Its matching rules, tests, and failure checks make each output traceable to its inputs.
+Restaurant GTM teams need a reliable way to identify accounts, prioritize outreach, and see what happens after a sale. RALI turns public Dallas restaurant records and website signals into a deduplicated account model and sales queue, then uses clearly labelled synthetic lifecycle events to exercise onboarding, adoption, renewal, and customer-success reporting. Its matching rules, tests, and failure checks make each output traceable to its inputs.
 
 **The real/synthetic boundary is the first thing to understand about this project.** Restaurant identity, address, and website signals are extracted from OpenStreetMap and observed public web pages. Everything about the *account lifecycle* — funnel entry, demos, closes, onboarding, orders, support tickets, renewals, health scores, and every date attached to them — is synthetic, generated with `random.seed(42)` and labelled `source_system = 'synthetic'` in the warehouse. No conversion rate, retention number, or revenue implication in this repository describes a real company or a real market.
 
-> **Build status: all phases 0–6 complete.** The committed test log is [`docs/dbt_test_output.txt`](docs/dbt_test_output.txt); the offline sample path is verified. Measured counts below come from the committed extract and the Supabase warehouse.
+> **Build status: Dallas run complete (2026-10-21).** `dbt build` passed 197/197 nodes with zero warnings or errors. Measured counts below come from the live Dallas extract and the Supabase warehouse. The committed test log [`docs/dbt_test_output.txt`](docs/dbt_test_output.txt) is from the earlier Chicago pilot; the offline sample path remains a Chicago test fixture.
 
 RALI models a restaurant-tech go-to-market and customer-success motion from prospect through post-sale lifecycle. It is built as a dbt project on Supabase Postgres, with four warehouse schemas (`raw`, `staging`, `intermediate`, `marts`), identity resolution over messy map data, explainable account scoring, and monitoring checks that are designed to catch the failure modes this kind of pipeline actually has.
 
 ## What it demonstrates
 
 - **Extract + load into hosted Postgres** with `COPY ... FROM STDIN`, idempotent re-runs, and schema isolation from Supabase's Data API.
-- **Identity resolution** over OSM records: a conservative match ladder (street name, house + street, full address, coordinate fallback, and a 50 m proximity supplement), survivorship by record richness, a visible `source_record_count`, and a committed [50-cluster audit](docs/dedup_audit_stratified.md) with 10/10 merge precision and 40/40 split precision.
+- **Identity resolution** over OSM records: a conservative match ladder (street name, house + street, full address, coordinate fallback, and a 50 m proximity supplement), survivorship by record richness, and a visible `source_record_count`. The [50-cluster audit](docs/dedup_audit_stratified.md) with 10/10 merge precision and 40/40 split precision was run on the earlier Chicago sample; the Dallas extract uses the same unchanged rules but has not been re-audited.
 - **Evidence-based enrichment**: homepage-only website fingerprints that store the matched fragment strings, not just booleans.
 - **Synthetic lifecycle generation** that is deterministic and deliberately messy, with the mess documented rather than hidden.
 - **dbt marts** for a sales queue, a customer-success queue, a CRM lifecycle funnel, a raw-event funnel, and per-account health.
@@ -25,28 +25,28 @@ RALI models a restaurant-tech go-to-market and customer-success motion from pros
 
 ## Source scope
 
-The account universe is Chicago full-service restaurants: `amenity=restaurant` inside `41.64,-87.94,42.03,-87.52`, nodes and ways, with a non-empty `name`. `amenity=fast_food` is out of scope. Outlets tagged with `brand` or `brand:wikidata` are excluded before load and counted in the Phase 1 gate report; the curated chain alias seed is a second, normalized-name check rather than the primary filter. This is a scope choice: the interesting sales motion is the independent operator, not the chain's central procurement team.
+The account universe is Dallas full-service restaurants: `amenity=restaurant` inside `32.60,-96.99,33.02,-96.55`, nodes and ways, with a non-empty `name`. The bbox covers Dallas plus its inner-ring suburbs (Richardson, Garland, Irving, Mesquite, Addison, Carrollton, Plano and others), so `territory` is Dallas-centric rather than a Dallas city limit. `amenity=fast_food` is out of scope. The Overpass response returned 1,785 elements; 302 outlets tagged with `brand` or `brand:wikidata` were excluded before load, leaving **1,483 raw records**. The curated chain alias seed is a second, normalized-name check rather than the primary filter. This is a scope choice: the interesting sales motion is the independent operator, not the chain's central procurement team.
 
 ## Website signals
 
-1,569 accounts have a public website. Deduping to normalized hosts gives 1,429 domains; 4 are third-party platform pages (7 accounts) and are not fetched, leaving 1,425 homepage requests. 1,109 returned HTTP 200 (77.8% of attempts). Of those, 491 show online ordering (44.3%), 376 reservations (33.9%), 231 delivery-marketplace links (20.8%), and 643 a recognized site platform (58.0%). Evidence fragments are stored per domain; 229 successful pages had no known fragment, which is a limitation of raw-HTML matching, not proof of absence.
+694 accounts have a public website. Deduping to normalized hosts gives 624 domains; 1 is a third-party platform page and is not fetched, leaving 623 homepage requests. 473 returned HTTP 200 (75.9% of attempts). Of those, 157 show online ordering (33.2%), 84 reservations (17.8%), 87 delivery-marketplace links (18.4%), and 241 a recognized site platform (51.0%). Evidence fragments are stored per domain; 137 successful pages had no known fragment, which is a limitation of raw-HTML matching, not proof of absence.
 
 ## Synthetic lifecycle
 
-925 of 2,644 accounts enter the funnel (35.0%): 370 book a demo, 111 close won, 94 onboard, 75 place a first order, and 53 reach 30-day active. The funnel is deliberately messy: 6 won accounts are explicit handoff leaks with no onboarding, 4 of the 53 active accounts get a support ticket, and 4 onboarded-never-ordered accounts get a renewal_due. All 1,636 events are `source_system = 'synthetic'`, use deterministic `uuid5` ids, and reproduce byte-for-byte with `random.seed(42)`.
+518 of 1,479 accounts enter the funnel (35.0%): 207 book a demo, 62 close won, 53 onboard, 42 place a first order, and 29 reach 30-day active. The funnel is deliberately messy: 3 won accounts are explicit handoff leaks with no onboarding, 2 of the 29 active accounts get a support ticket, and 2 onboarded-never-ordered accounts get a renewal_due. All 915 events are `source_system = 'synthetic'`, use deterministic `uuid5` ids, and reproduce byte-for-byte with `random.seed(42)`; the Dallas build recorded zero stage-order violations.
 
 ## Marts
 
-- `dim_account` — 2,644 accounts, fit score 0–90 (the practical max is 90 because ordering and delivery-only are mutually exclusive).
-- `mart_sales_queue` — 2,638 independent accounts ranked by fit; 361 priority, 815 nurture, 1,462 low.
-- `mart_rep_research_queue` — additive view with evidence, research prompts, possible multi-location groups, and a closed outreach gate. The local 200-account sample build passed; live warehouse counts have not been refreshed.
-- `mart_cs_queue` — 94 onboarded accounts; 23 at risk, 49 expansion reviews, 4 support check-ins, 4 renewal saves.
-- `mart_handoff_exceptions` — closed-won accounts missing onboarding, with a demo owner assignment and a stable notification key. The committed events imply 17 live exceptions and one in the 200-account sample; this addition has not yet been included in a recorded dbt build.
-- `funnel_summary` — 925 → 370 → 111 → 94 → 75 → 53 across the six raw stages.
-- `mart_lifecycle_funnel` — CRM stages Lead 925 → SQL 370 → Opportunity 111 → Customer 94 → Active 75, with stage conversion and median days.
-- `crm_identity_map` — 2,644 accounts; 6 matched (2 exact domain, 1 exact phone+address, 3 fuzzy), 3 flagged for human review, 1 CRM-only record ignored.
+- `dim_account` — 1,479 accounts, fit score 0–90 (the practical max is 90 because ordering and delivery-only are mutually exclusive).
+- `mart_sales_queue` — 1,477 independent accounts ranked by fit; 134 priority, 383 nurture, 960 low.
+- `mart_rep_research_queue` — additive view with evidence, research prompts, possible multi-location groups, and a closed outreach gate. The Dallas build returns 1,477 rows, 125 with a possible shared-domain group, and 0 ready for outreach.
+- `mart_cs_queue` — 53 onboarded accounts; 13 at risk, 27 expansion reviews, 2 support check-ins, 2 renewal saves.
+- `mart_handoff_exceptions` — 9 closed-won Dallas accounts missing onboarding, with a demo owner assignment and a stable notification key.
+- `funnel_summary` — 518 → 207 → 62 → 53 → 42 → 29 across the six raw stages.
+- `mart_lifecycle_funnel` — CRM stages Lead 518 → SQL 207 → Opportunity 62 → Customer 53 → Active 42, with stage conversion and median days.
+- `crm_identity_map` — 1,479 accounts; 0 matched, because the committed mock CRM and its resolution seed are still the Chicago demo set. No Dallas account is claimed as a CRM match.
 
-Both queues expose `signal_confidence`, `failure_class`, and `signal_coverage_pct` as top-level columns. Queue coverage is 37.2% confirmed; the other 62.8% are flagged as unknown rather than silently treated as “no signal.”
+Both queues expose `signal_confidence`, `failure_class`, and `signal_coverage_pct` as top-level columns. Dallas queue coverage is 26.2% confirmed; the other 73.8% are flagged as unknown rather than silently treated as “no signal.”
 
 ## Outbound approval harness (n8n)
 
@@ -72,7 +72,7 @@ python scripts/sync_to_crm.py --limit 5
 python scripts/sync_to_crm.py --sync-timestamp 2026-10-21T12:00:00Z
 ```
 
-Current result against the committed mock: **361 priority accounts → 358 creates, 3 updates, 0 unchanged, 1 CRM-only ignored, 361 payloads**. The three existing records need fields that the mock has not yet stored; Asadito also has a fit-score change (70 → 90). Running the same diff twice with a fixed timestamp produces byte-identical payloads and identical idempotency keys.
+Current Dallas result against the committed mock: **134 priority accounts → 134 creates, 0 updates, 0 unchanged, 4 CRM-only ignored, 134 payloads**. The mock records are the Chicago demo set, so they do not match any Dallas `account_id`; that is a fixture limitation, not a Dallas CRM result. Running the same diff twice with a fixed timestamp produces byte-identical payloads and identical idempotency keys.
 
 The architectural point is that the **warehouse owns the business state** — rank, fit score, territory, intent, confidence — while the sync edge owns only the diff and the API call. The CRM receives idempotent upserts, not a re-send of the whole queue. A production version would add OAuth/secrets, a real CRM client, batching, rate-limit handling, retries with a dead-letter path, and an audit log. This is the "connect two systems with no native integration" pattern without pretending the mock is a real integration.
 
@@ -88,7 +88,7 @@ Matching waterfall:
 
 Any candidate below **95%** is written with `needs_human_review = true`. Unmatched accounts have `match_method = 'unmatched'`, a null `crm_account_id`, and confidence 0; they are not review cases because there is no candidate to review.
 
-Current mock result: **2,644 accounts → 6 matched** (2 exact domain, 1 exact phone+address, 3 fuzzy), **2,638 unmatched**, **3 flagged for human review**, and **1 CRM-only record ignored**. The three review candidates are Athena (82.5), Big Star (77.9), and Bistronomic (83.1). The 2,638 unmatched rows are retained in the map rather than dropped; the model exposes `is_matched`.
+Current Dallas result: **1,479 accounts → 0 matched**, all **1,479 unmatched**, zero review candidates, and the 4 Chicago mock records are ignored as CRM-only. The mock CRM and `seeds/crm_identity_resolution.csv` were not regenerated for Dallas, so this section demonstrates the matching mechanics rather than a Dallas CRM state. Unmatched rows are retained in the map rather than dropped; the model exposes `is_matched`.
 
 Regenerate and build:
 
@@ -185,7 +185,7 @@ dotenv run -- dbt seed --profiles-dir . --full-refresh
 dotenv run -- dbt build --profiles-dir . --full-refresh --vars '{use_sample_data: true}'
 ```
 
-The earlier recorded build verified 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, a 200-row identity map, and 167/167 tests with zero warnings; its log is [`docs/sample_build_output.txt`](docs/sample_build_output.txt). On October 21, 2026, the full sample build was rerun in an isolated local Postgres database with the pinned dbt 1.12.6 environment: **197/197 nodes passed, including 173 data tests**, with zero warnings or errors. The new research view returned 197 accounts, four rows with a possible shared-domain group, and zero rows ready for outreach. [Verification and DeepSeek handoff](docs/deepseek_handoff_2026-10-21.md). A Postgres target is still required (dbt seeds into it), but live raw tables are not. Run `--full-refresh` only against an isolated test target because it replaces the incremental event fact and other existing target relations.
+The earlier recorded build verified 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, a 200-row identity map, and 167/167 tests with zero warnings; its log is [`docs/sample_build_output.txt`](docs/sample_build_output.txt). On October 21, 2026, the full sample build was rerun in an isolated local Postgres database with the pinned dbt 1.12.6 environment: **197/197 nodes passed, including 173 data tests**, with zero warnings or errors. The new research view returned 197 accounts, four rows with a possible shared-domain group, and zero rows ready for outreach. [Verification and DeepSeek handoff](docs/deepseek_handoff_2026-10-21.md). A Postgres target is still required (dbt seeds into it), but live raw tables are not. Run `--full-refresh` only against an isolated test target because it replaces the incremental event fact and other existing target relations. The committed sample seeds remain a 200-account Chicago fixture used to test SQL without network access; they are not the Dallas warehouse.
 
 ## Monitoring
 
@@ -215,12 +215,12 @@ No owner names, personal emails, or mobile numbers are collected. Business phone
 
 ## Limitations
 
-- **OSM is not a business registry.** Closures, renames, and duplicate nodes are normal. Dedup precision is audited at 100% on a stratified sample of 50 clusters. Recall is not measured — the under-merge rate for same-name records >50m apart with no shared address is unknown, estimated under 2%. The dedup is deliberately precision-biased: a TAM list should not silently drop accounts.
-- **The dedup rate is 0.38%.** 2,654 raw records became 2,644 accounts (10 merges). The stratified 50-cluster audit found 10/10 merge precision and no false splits, but recall is unmeasured. The low rate is plausible for this query (only explicitly tagged restaurants, chains removed) and is a limitation, not proof of completeness.
-- **Coverage is incomplete.** OSM maps roughly 50–65% of Chicago's restaurant universe by common estimates. This is a representative sample of the mapped market, not a census; counts describe named, independent, full-service restaurants in the bbox, not every restaurant in Chicago.
-- **Territory has an Unknown bucket.** 470 accounts (17.8%) have neither a usable postcode nor a city and are retained as `Unknown` rather than dropped; territory slicing is weaker for them.
+- **OSM is not a business registry.** Closures, renames, and duplicate nodes are normal. On the earlier Chicago sample, dedup precision was audited at 100% on a stratified 50-cluster sample; the Dallas run uses identical rules but was not re-audited. Recall is not measured — the under-merge rate for same-name records >50m apart with no shared address is unknown. The dedup is deliberately precision-biased: a TAM list should not silently drop accounts.
+- **The Dallas dedup rate is 0.27%.** 1,483 raw records became 1,479 accounts (4 merges). Recall is unmeasured and this run has not been stratified-audited. The low rate is plausible for this query (only explicitly tagged restaurants, chains removed) and is a limitation, not proof of completeness.
+- **Coverage is incomplete.** OSM does not map every restaurant. This is a representative sample of the mapped Dallas market, not a census; counts describe named, independent, full-service restaurants in the bbox, not every restaurant in Dallas.
+- **Territory has a large Unknown bucket.** 665 accounts (45.0%) have neither a usable postcode nor a city and are retained as `Unknown` rather than dropped; Dallas OSM address coverage is sparser than the earlier Chicago extract, so territory slicing is materially weaker here.
 - **Homepage-only fingerprinting undercounts.** Ordering widgets are often injected by JavaScript or a third-party script that does not appear in raw HTML. A missing signal is not evidence that the restaurant lacks the capability.
-- **Signal coverage is biased.** Signal-based fit components under-represent 37.3% of the website-account base (586 of 1,569) where the homepage could not be fingerprinted; accounts in this population are not known to lack these signals. The earlier 34.7% figure mixed 545 domain rows with a 1,569-account denominator; the account-weighted figure is 37.3% including the 7 skipped third-party accounts.
+- **Signal coverage is biased.** Only 26.2% of accounts (387 of 1,479) have a confirmed homepage signal. 785 accounts (53.1%) record no website at all, and 116 of 623 fetchable domains returned HTTP errors, so signal-based fit components under-represent this population; these accounts are not known to lack the capabilities.
 - **403 is not 404.** A 403 is a live site blocking the crawler; a 404 is a dead URL. Both are `unknown_unreachable`, but they are not the same operational fact.
 - **The lifecycle is synthetic.** It is calibrated to be plausible, not to reproduce any company's funnel. Funnel outputs are a demonstration of modeling, not a benchmark.
 - **A free Supabase project can pause.** The committed sample path lets a reviewer rebuild the warehouse without the live raw tables; it still needs a Postgres target.

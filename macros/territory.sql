@@ -1,21 +1,30 @@
 {% macro territory(postcode, city) %}
     {#
-      Coarse Chicago sales territory from ZIP and city. The ranges are a
-      portfolio simplification, not official community areas. Unknown is a
-      deliberate bucket so territory is never null.
+      Coarse Dallas sales territory from ZIP and city. The buckets are a
+      portfolio simplification, not official neighborhoods or council areas.
+      Unknown is a deliberate bucket so territory is never null.
     #}
     {% set zip = "left(regexp_replace(coalesce(" ~ postcode ~ ", ''), '\\D', '', 'g'), 5)" %}
     case
-        when {{ zip }} ~ '^6060[1-7]$' then 'Chicago Downtown'
-        when {{ zip }} ~ '^606(0[89]|1[0-6])$' then 'Chicago South'
-        when {{ zip }} ~ '^606(1[7-9]|2[0-8])$' then 'Chicago Far South'
-        when {{ zip }} ~ '^606(2[9]|3[0-9])$' then 'Chicago Southwest'
-        when {{ zip }} ~ '^606(4[0-5])$' then 'Chicago North'
-        when {{ zip }} ~ '^606(4[6-9]|5[0-9])$' then 'Chicago Northwest'
-        when {{ zip }} = '60660' then 'Chicago North'
-        when {{ zip }} = '60661' then 'Chicago Downtown'
-        when {{ zip }} ~ '^606' then 'Chicago Other'
-        when lower(coalesce(trim({{ city }}), '')) = 'chicago' then 'Chicago Other'
+        when {{ zip }} in (
+            '75201', '75202', '75203', '75204', '75205', '75206',
+            '75207', '75219', '75226'
+        ) then 'Dallas Downtown'
+        when {{ zip }} in ('75214', '75218', '75223', '75227', '75228')
+            then 'Dallas East'
+        when {{ zip }} in (
+            '75208', '75210', '75211', '75212', '75215', '75216',
+            '75217', '75224', '75232', '75233', '75236', '75237',
+            '75241', '75249', '75253'
+        ) then 'Dallas South'
+        when {{ zip }} in (
+            '75209', '75220', '75225', '75229', '75230', '75231',
+            '75234', '75235', '75238', '75240', '75243', '75244',
+            '75246', '75247', '75248', '75251', '75252', '75254',
+            '75287', '75390'
+        ) then 'Dallas North'
+        when {{ zip }} ~ '^75[01]' then 'Dallas Metro'
+        when lower(coalesce(trim({{ city }}), '')) = 'dallas' then 'Dallas Other'
         when nullif(trim({{ city }}), '') is not null then 'Suburbs'
         else 'Unknown'
     end

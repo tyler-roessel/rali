@@ -21,7 +21,7 @@ models:
                 min_value: 0
                 max_value: 100
       - name: territory
-        description: "Coarse Chicago territory from postcode/city; Unknown when both are missing."
+        description: "Coarse Dallas territory from postcode/city; Unknown when both are missing."
         tests:
           - not_null
       - name: signal_confidence
@@ -163,7 +163,7 @@ models:
 
   - name: mart_rep_research_queue
     description: >
-      Additive research view over the Chicago sales queue. Evidence fragments,
+      Additive research view over the Dallas sales queue. Evidence fragments,
       possible shared-domain groups, hypotheses, and mock CRM review state are
       kept distinct. No row is authorized for automated outreach.
     columns:

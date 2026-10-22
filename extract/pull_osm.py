@@ -1,4 +1,4 @@
-"""Phase 1: pull Chicago full-service restaurants from Overpass into raw.osm_restaurants.
+"""Phase 1: pull Dallas full-service restaurants from Overpass into raw.osm_restaurants.
 
 Scope decisions (approved 2026-10-20):
 * ``amenity=restaurant`` only. ``fast_food`` is excluded so the account universe
@@ -33,7 +33,8 @@ OVERPASS_URL = os.environ.get(
 )
 USER_AGENT = "RALI-portfolio/1.0 (restaurant account lifecycle modeling; one-shot extract)"
 
-BBOX = "41.64,-87.94,42.03,-87.52"  # south,west,north,east
+MARKET = "Dallas"
+BBOX = "32.60,-96.99,33.02,-96.55"  # south,west,north,east
 
 QUERY = f"""
 [out:json][timeout:60];
@@ -90,7 +91,7 @@ CREATE INDEX IF NOT EXISTS osm_restaurants_name_idx
     ON raw.osm_restaurants (lower(name));
 
 COMMENT ON TABLE raw.osm_restaurants IS
-    'Real OpenStreetMap restaurant records (amenity=restaurant), Chicago bbox. '
+    'Real OpenStreetMap restaurant records (amenity=restaurant), Dallas bbox. '
     'Chain-tagged outlets excluded in Python. Source: Overpass API, ODbL.';
 COMMENT ON COLUMN raw.osm_restaurants.osm_uid IS
     'Synthetic stable key: osm_type || '':'' || osm_id. OSM ids are only unique per element type.';
@@ -288,6 +289,7 @@ def main() -> int:
         raw_path = args.from_file
     else:
         print(f"Overpass endpoint: {OVERPASS_URL}")
+        print(f"Market: {MARKET}")
         print(f"Bbox: {BBOX}")
         payload = fetch_overpass()
         raw_path = save_raw(payload)

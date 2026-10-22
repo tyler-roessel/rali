@@ -1,10 +1,9 @@
 territory,owner_key
-Chicago Downtown,cx_downtown
-Chicago South,cx_south
-Chicago Far South,cx_south
-Chicago Southwest,cx_south
-Chicago North,cx_north
-Chicago Northwest,cx_north
-Chicago Other,cx_triage
+Dallas Downtown,cx_downtown
+Dallas East,cx_north
+Dallas North,cx_north
+Dallas South,cx_south
+Dallas Metro,cx_triage
+Dallas Other,cx_triage
 Suburbs,cx_triage
 Unknown,cx_triage
