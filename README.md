@@ -61,7 +61,7 @@ The CS queue begins after onboarding, so it cannot surface a closed-won account 
 The warehouse is not useful if the sales team has to copy numbers into the CRM by hand. [`scripts/sync_to_crm.py`](scripts/sync_to_crm.py) simulates the reverse-ETL edge:
 
 1. **Read the curated state.** Pull `mart_sales_queue` rows with `fit_score >= 80` from Supabase.
-2. **Read the current CRM state.** Load the small [`mock_crm_records.json`](mock_crm_records.json) file.
+2. **Read the current CRM state.** Load the Dallas [`mock_crm_records.json`](mock_crm_records.json) payload.
 3. **Diff in the edge process.** Match on `account_id`: missing accounts are creates; any difference across the fields sent to the CRM triggers an update, including a field absent from the mock record; equal records are unchanged; CRM-only records are ignored so a sync never deletes.
 4. **Emit only the changes.** Print the JSON payloads a CRM API would receive, including `sync_timestamp`, `crm_id` for updates, and a deterministic `idempotency_key` derived from the desired state.
 
@@ -72,7 +72,7 @@ python scripts/sync_to_crm.py --limit 5
 python scripts/sync_to_crm.py --sync-timestamp 2026-10-21T12:00:00Z
 ```
 
-Current Dallas result against the committed mock: **134 priority accounts → 134 creates, 0 updates, 0 unchanged, 4 CRM-only ignored, 134 payloads**. That mock (`mock_crm_records.json`) is still the Chicago demo set and is separate from the Dallas identity-resolution seed, so it does not match any Dallas `account_id`; that is a fixture limitation, not a Dallas CRM result. Running the same diff twice with a fixed timestamp produces byte-identical payloads and identical idempotency keys.
+Current Dallas result against the committed mock: **134 priority accounts, 51 CRM records → 84 creates, 20 updates, 30 unchanged, 1 CRM-only ignored, 104 payloads**. The mock is generated from 50 Dallas priority accounts by [`scripts/build_dallas_mock_crm_records.py`](scripts/build_dallas_mock_crm_records.py): 30 exact snapshots, 20 deliberately stale records (older fit score, rank, and confidence), and one CRM-only row that proves the sync never deletes. The file uses CRM-style keys (`Id`, `Name`, `Website`), which the loader normalizes. Running the same diff twice with a fixed timestamp produces byte-identical payloads and identical idempotency keys.
 
 The architectural point is that the **warehouse owns the business state** — rank, fit score, territory, intent, confidence — while the sync edge owns only the diff and the API call. The CRM receives idempotent upserts, not a re-send of the whole queue. A production version would add OAuth/secrets, a real CRM client, batching, rate-limit handling, retries with a dead-letter path, and an audit log. This is the "connect two systems with no native integration" pattern without pretending the mock is a real integration.
 

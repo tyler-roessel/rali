@@ -64,6 +64,22 @@ def load_warehouse(min_fit_score: int) -> list[dict[str, Any]]:
         conn.close()
 
 
+# CRM exports use display keys; the diff logic uses internal names. Accept both
+# so the mock file can look like a CRM payload without changing the diff code.
+CRM_KEY_MAP = {
+    "Id": "crm_id",
+    "AccountId": "account_id",
+    "Name": "account_name",
+    "Website": "website",
+    "FitScore": "fit_score",
+    "QueueRank": "queue_rank",
+    "Territory": "territory",
+    "ObservedCapability": "observed_capability",
+    "SignalConfidence": "signal_confidence",
+    "LastSyncedAt": "last_synced_at",
+}
+
+
 def load_mock_crm(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         raise FileNotFoundError(
@@ -73,7 +89,10 @@ def load_mock_crm(path: Path) -> list[dict[str, Any]]:
     records = payload.get("records") if isinstance(payload, dict) else payload
     if not isinstance(records, list):
         raise ValueError("Mock CRM must be a list or an object with a 'records' list")
-    return records
+    return [
+        {CRM_KEY_MAP.get(key, key): value for key, value in record.items()}
+        for record in records
+    ]
 
 
 def desired_fields(row: dict[str, Any]) -> dict[str, Any]:
