@@ -6,7 +6,7 @@ Popmenu runs a high-velocity, low-ACV GTM motion: thousands of addressable resta
 
 > **Build status: Dallas run complete (2026-10-21; logs refreshed 2026-10-22).** `dbt build` passed 197/197 nodes with zero warnings or errors. Measured counts below come from the live Dallas extract and the Supabase warehouse. The committed test log [`docs/dbt_test_output.txt`](docs/dbt_test_output.txt) is the Dallas run, and the offline sample path is built on a 200-account Dallas fixture.
 
-RALI models a full-funnel restaurant-tech GTM engineering motion from prospect through post-sale lifecycle. It is built as a dbt project on Supabase Postgres, with four warehouse schemas (`raw`, `staging`, `intermediate`, `marts`), identity resolution over messy map data, explainable account scoring, and monitoring checks designed to catch the failure modes this kind of pipeline actually has.
+RALI models a full-funnel restaurant-tech GTM engineering motion from prospect through post-sale lifecycle. It is built as a dbt project on Supabase Postgres, with four warehouse schemas (`raw`, `staging`, `intermediate`, `marts`), identity resolution over inconsistent map data, explainable account scoring, and monitoring checks designed to catch the failure modes this kind of pipeline actually has.
 
 ## What it demonstrates
 
@@ -15,11 +15,11 @@ RALI models a full-funnel restaurant-tech GTM engineering motion from prospect t
 - **CRM identity resolution and reverse ETL.** A waterfall (exact domain, exact phone+address, fuzzy name+geo) maps 1,479 accounts to a 50-record mock CRM with 50 matches and zero unflagged low-confidence links; [`scripts/sync_to_crm.py`](scripts/sync_to_crm.py) emits idempotent creates and updates only.
 - **A Salesloft execution handoff.** [`scripts/simulate_salesloft_handoff.py`](scripts/simulate_salesloft_handoff.py) builds a `cadence_membership` payload for `person_id`/`cadence_id` behind the `outreach_ready` gate and never sends.
 - **A single source of truth for the market.** Overpass extract into hosted Postgres with `COPY ... FROM STDIN`, idempotent re-runs, chain filtering, and a 1,479-account Dallas dimension.
-- **Account identity resolution over messy map data.** A conservative match ladder (street name, house + street, full address, coordinate fallback, 50 m proximity), survivorship by record richness, and a visible `source_record_count`; the [50-cluster audit](docs/dedup_audit_stratified.md) documents 10/10 merge precision and 40/40 split precision on the historical audit sample.
+- **Account identity resolution over inconsistent map data.** A conservative match ladder (street name, house + street, full address, coordinate fallback, 50 m proximity), survivorship by record richness, and a visible `source_record_count`; the [50-cluster audit](docs/dedup_audit_stratified.md) documents 10/10 merge precision and 40/40 split precision on the historical audit sample.
 - **Evidence-based enrichment.** Homepage-only fingerprints that store the matched fragment strings, not just booleans.
 - **A Post-Sale Health module.** To demonstrate full-lifecycle GTM engineering, the warehouse also includes a CS queue (`mart_cs_queue`) to track onboarding velocity and expansion risks, ensuring the data layer serves the entire customer journey, not just top-of-funnel acquisition.
 - **A Sales-to-CX exception queue** with territory routing and an inactive workflow for internal handoff alerts.
-- **Synthetic lifecycle generation** that is deterministic and deliberately messy, with the mess documented rather than hidden.
+- **Synthetic lifecycle generation** that is deterministic and deliberately irregular, with those irregularities documented rather than hidden.
 - **A rules-based fit score** that can be explained in one paragraph without opening the code.
 - **Monitoring and tests** that answer "how would I know it broke?" rather than only "does it run?"
 
@@ -47,7 +47,7 @@ The account universe is Dallas full-service restaurants: `amenity=restaurant` in
 
 ## Synthetic lifecycle
 
-518 of 1,479 accounts enter the funnel (35.0%): 207 book a demo, 62 close won, 53 onboard, 42 place a first order, and 29 reach 30-day active. The funnel is deliberately messy: 3 won accounts are explicit handoff leaks with no onboarding, 2 of the 29 active accounts get a support ticket, and 2 onboarded-never-ordered accounts get a renewal_due. All 915 events are `source_system = 'synthetic'`, use deterministic `uuid5` ids, and reproduce byte-for-byte with `random.seed(42)`; the Dallas build recorded zero stage-order violations.
+518 of 1,479 accounts enter the funnel (35.0%): 207 book a demo, 62 close won, 53 onboard, 42 place a first order, and 29 reach 30-day active. The funnel is deliberately imperfect: 3 won accounts are explicit handoff leaks with no onboarding, 2 of the 29 active accounts get a support ticket, and 2 onboarded-never-ordered accounts get a renewal_due. All 915 events are `source_system = 'synthetic'`, use deterministic `uuid5` ids, and reproduce byte-for-byte with `random.seed(42)`; the Dallas build recorded zero stage-order violations.
 
 ## Marts
 
