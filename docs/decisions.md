@@ -32,7 +32,7 @@ Warehouse objects live in `raw`, `staging`, `intermediate`, and `marts`. Nothing
 
 Every synthetic row carries `source_system = 'synthetic'`. dbt model descriptions and column comments repeat the boundary at the point of use. The README states it in the first 100 words. A reviewer should never be able to cite a funnel number as real.
 
-**Coverage caveat.** OSM coverage of Chicago restaurants is roughly 50–65% of the true universe. RALI is a representative sample of the mapped market, not a census. Counts in this warehouse mean "named, independent, full-service restaurants mapped in this bbox," not "all restaurants in Chicago." This is a limitation to state plainly, not a gap to fill with invented records.
+**Coverage caveat.** OSM coverage of a market's restaurants is roughly 50–65% of the true universe by common estimates. RALI is a representative sample of the mapped market, not a census. Counts in this warehouse mean "named, independent, full-service restaurants mapped in this bbox," not "all restaurants in the market." This is a limitation to state plainly, not a gap to fill with invented records.
 
 ## 4. Identity resolution
 
@@ -243,18 +243,18 @@ dbt seed --profiles-dir . --full-refresh
 dbt build --profiles-dir . --full-refresh --vars '{use_sample_data: true}'
 ```
 
-Verified on the committed seeds: 200 accounts, 123 events, 197-row sales queue, 7-row CS queue, 200-row identity map, 6-row funnel, **167/167 tests, 0 warnings**. The sample build still needs a Postgres target (dbt seeds into it), but it makes no Overpass or website requests and does not depend on the live raw tables. On a database that already contains the live marts, `--full-refresh` is required so the incremental event fact is replaced rather than merged with live events.
+Verified on the committed seeds: 200 Dallas accounts, 123 events, 200-row sales queue, 7-row CS queue, 200-row identity map, 6-row funnel, **197/197 tests, 0 warnings**. The sample build still needs a Postgres target (dbt seeds into it), but it makes no Overpass or website requests and does not depend on the live raw tables. On a database that already contains the live marts, `--full-refresh` is required so the incremental event fact is replaced rather than merged with live events.
 
 ## 8a. Phase 6 verification
 
-- Live `dbt build`: **167/167, 0 warnings, 146 data tests**. The committed log is [`docs/dbt_test_output.txt`](dbt_test_output.txt).
-- Offline sample build: **167/167, 0 warnings** from 200 accounts, 123 events, a 197-row sales queue, a 7-row CS queue, and a 200-row identity map. The committed log is [`docs/sample_build_output.txt`](sample_build_output.txt).
-- `fct_lifecycle_event` is incremental with `delete+insert`; a second run kept 1,636 rows and 1,636 distinct event IDs.
+- Live `dbt build`: **197/197, 0 warnings, 173 data tests**. The committed log is [`docs/dbt_test_output.txt`](dbt_test_output.txt).
+- Offline sample build: **197/197, 0 warnings** from 200 Dallas accounts, 123 events, a 200-row sales queue, a 7-row CS queue, and a 200-row identity map. The committed log is [`docs/sample_build_output.txt`](sample_build_output.txt).
+- `fct_lifecycle_event` is incremental with `delete+insert`; a second run kept 915 rows and 915 distinct event IDs.
 - `tests/assert_lifecycle_stage_order.sql` and the custom `tests/generic/between.sql` test both pass.
-- Monitoring returns expected alerts, not pipeline errors: territory `Unknown` 17.8%, `full_address` null 13.6%, confirmed signal coverage 37.2%. Dedup duplicates, orphan events, out-of-order events, duplicate event pairs, fit-score range, and queue reconciliation are clean. `public` has zero base tables.
+- Monitoring returns expected alerts, not pipeline errors: territory `Unknown` 45.0%, `full_address` null 28.3%, confirmed signal coverage 26.2%. Dedup duplicates, orphan events, out-of-order events, duplicate event pairs, fit-score range, and queue reconciliation are clean. `public` has zero base tables.
 - Credential scan of tracked files finds no secrets; `.env` is ignored.
 
-The remaining honest caveats are the dedup rate/recall (0.38%, unmeasured recall), the 37.3% signal-unknown population, the 17.8% territory `Unknown` bucket, and the raw-HTML blind spot for JavaScript-injected ordering.
+The remaining honest caveats are the dedup rate/recall (0.27%, unmeasured recall), the 73.8% signal-unknown population, the 45.0% territory `Unknown` bucket, and the raw-HTML blind spot for JavaScript-injected ordering.
 
 ## 9. Spec deviations and open issues
 

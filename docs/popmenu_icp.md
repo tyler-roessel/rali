@@ -4,7 +4,7 @@ RALI is a Dallas pilot for a restaurant GTM workflow, not Popmenu's customer lis
 
 The [GTM Engineer posting](https://apply.workable.com/popmenu/j/0CC5B68239/) calls for a reliable restaurant account source, territory routing, fit and intent signals, CRM workflows, and Sales-to-CX handoffs. The [Dallas Account Executive posting](https://apply.workable.com/popmenu/j/ABFEC6B5A7) discusses owner-led restaurants and multi-location operators. These are product and role signals, not proof that any RALI account is qualified or in market.
 
-The warehouse now models the Dallas market. The 2026-10-21 run used the Dallas bbox (`32.60,-96.99,33.02,-96.55`) and produced 1,479 accounts, 1,477 research-queue rows, and 125 rows with a possible shared-domain group; none is outreach-ready. The earlier Chicago extract survives only as the committed offline sample fixture and as the audit record behind the matching rules.
+The warehouse now models the Dallas market. The 2026-10-21 run used the Dallas bbox (`32.60,-96.99,33.02,-96.55`) and produced 1,479 accounts, 1,477 research-queue rows, and 125 rows with a possible shared-domain group; none is outreach-ready. The historical 50-cluster audit remains the evidence behind the matching rules, and the committed offline sample fixture is Dallas-derived.
 
 ## What the view adds
 
