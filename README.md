@@ -10,7 +10,7 @@ RALI models a full-funnel restaurant GTM lifecycle from prospect through post-sa
 
 ## What it demonstrates
 
-- **A signal-ranked rep research queue.** `mart_rep_research_queue` is the primary rep surface: fit, territory, homepage evidence, possible shared-domain groups, mock CRM review state, a use-case hypothesis, a next research step, and a closed `outreach_ready` gate.
+- **A signal-ranked rep research queue.** `mart_rep_research_queue` is the primary rep surface: fit, territory, homepage evidence, possible shared-domain groups, mock CRM review state, a use-case hypothesis, a next research step, and a closed `outreach_ready` gate. [ICP research](docs/icp_research.md).
 - **AI guardrails before anything reaches a restaurant.** The inactive [`n8n`](n8n/outbound_harness.json) harness drafts exactly two sentences, checks length, sentence count, URLs, and placeholders, routes failures to a hold branch, and requires human Slack approval; nothing auto-sends.
 - **CRM identity resolution and reverse ETL.** A waterfall (exact domain, exact phone+address, fuzzy name+geo) maps 1,479 accounts to a 50-record mock CRM with 50 matches and zero unflagged low-confidence links; [`scripts/sync_to_crm.py`](scripts/sync_to_crm.py) emits idempotent creates and updates only.
 - **A Salesloft execution handoff.** [`scripts/simulate_salesloft_handoff.py`](scripts/simulate_salesloft_handoff.py) builds a `cadence_membership` payload for `person_id`/`cadence_id` behind the `outreach_ready` gate and never sends.

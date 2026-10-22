@@ -46,7 +46,7 @@
               "role": "system"
             },
             {
-              "content": "=Account: {{ $json.account_name }}\nTerritory: {{ $json.territory }}\nDemo fit score: {{ $json.fit_score }}\nHomepage clue: {{ $json.observed_capability }}\nSignal confidence: {{ $json.signal_confidence }}\nResearch step: {{ $json.suggested_action }}\n\nWrite exactly two sentences of draft outbound copy to the operator. Treat the clue as a research hypothesis, not buying intent or proven pain. Do not claim the restaurant lacks a capability, wants to buy, or is a Popmenu customer. Do not include a URL, placeholder, or claim about results.",
+              "content": "=Account: {{ $json.account_name }}\nTerritory: {{ $json.territory }}\nDemo fit score: {{ $json.fit_score }}\nHomepage clue: {{ $json.observed_capability }}\nSignal confidence: {{ $json.signal_confidence }}\nResearch step: {{ $json.suggested_action }}\n\nWrite exactly two sentences of draft outbound copy to the operator. Treat the clue as a research hypothesis, not buying intent or proven pain. Do not claim the restaurant lacks a capability, wants to buy, or is an existing customer. Do not include a URL, placeholder, or claim about results.",
               "role": "user"
             }
           ]

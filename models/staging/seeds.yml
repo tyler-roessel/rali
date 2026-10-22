@@ -4,7 +4,7 @@ seeds:
   - name: handoff_owner_routing
     description: >
       Illustrative territory-to-CX-owner routing for synthetic handoff alerts.
-      Owner keys are roles, not real Popmenu employees or Slack identities.
+      Owner keys are roles, not real employees or Slack identities.
     columns:
       - name: territory
         tests:

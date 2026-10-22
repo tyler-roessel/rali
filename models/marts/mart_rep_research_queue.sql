@@ -1,7 +1,7 @@
 {{ config(materialized='view') }}
 
 -- A research worklist, not a send list. The CRM map is a mock and cannot
--- establish customer status in Popmenu's private systems.
+-- establish customer status in the platform's private systems.
 with shared_domains as (
     select
         account.website_domain,
