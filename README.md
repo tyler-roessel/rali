@@ -16,6 +16,7 @@ RALI models a restaurant-tech go-to-market and customer-success motion from pros
 - **Synthetic lifecycle generation** that is deterministic and deliberately messy, with the mess documented rather than hidden.
 - **dbt marts** for a sales queue, a customer-success queue, a CRM lifecycle funnel, a raw-event funnel, and per-account health.
 - **An n8n approval harness** that drafts one outbound message and blocks it at a human Slack approval step.
+- **A Salesloft cadence handoff simulation** that builds an enrollment payload only after a human review and never auto-sends.
 - **A Sales-to-CX exception queue** with territory routing and an inactive workflow for internal handoff alerts.
 - **A reverse-ETL sync simulation** that diffs the warehouse against a mock CRM and emits idempotent create/update payloads.
 - **A CRM identity-resolution waterfall** with exact domain, exact phone+address, and fuzzy name+geo matching; sub-95% candidates are flagged for human review.
@@ -51,6 +52,28 @@ Both queues expose `signal_confidence`, `failure_class`, and `signal_coverage_pc
 ## Outbound approval harness (n8n)
 
 [`n8n/outbound_harness.json`](n8n/outbound_harness.json) is an inactive, importable workflow: Postgres pulls one row from `mart_sales_queue`, an OpenAI node drafts exactly two sentences, a Code guardrail checks length (80–500), sentence count (exactly 2), URLs, and placeholders, and an IF node routes the draft to Slack for a human approval reply. Failed drafts go to a hold branch and never reach Slack. The workflow does not auto-send; approval is a human action. Import it, set the Postgres/OpenAI/Slack credentials, and replace the `#sales-approvals` channel placeholder.
+
+## Salesloft Execution Handoff
+
+The warehouse produces the prioritized research queue; it does not send anything. [`scripts/simulate_salesloft_handoff.py`](scripts/simulate_salesloft_handoff.py) demonstrates the execution edge: it selects one identity-resolved account from [`marts.mart_rep_research_queue`](models/marts/mart_rep_research_queue.sql), constructs the Salesloft `cadence_membership` payload (`person_id`, `cadence_id`, account context, deterministic idempotency key), and stops.
+
+The guardrail is `outreach_ready`. Every row is currently false, so the default run refuses to stage the enrollment:
+
+```bash
+python scripts/simulate_salesloft_handoff.py
+# HOLD: Account not yet cleared for outreach. Salesloft enrollment blocked.
+```
+
+A human can simulate the review approval that unblocks staging:
+
+```bash
+python scripts/simulate_salesloft_handoff.py --human-approved
+# STAGED FOR SALESLOFT: {...} - Awaiting rep send.
+```
+
+Even then the script makes no network call and performs no send. `--human-approved` is an explicit acknowledgment that stands in for the review, not an automation. The same contract applies to the inactive n8n harness: the warehouse and the integration layer can prepare the enrollment, but a rep still presses send in Salesloft.
+
+The production split is deliberate: the queue owns rank, evidence, and the closed gate; the handoff script owns payload construction and idempotency; Salesloft owns delivery and the approval audit trail.
 
 ## Sales-to-CX handoff alerts
 
