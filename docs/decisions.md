@@ -4,7 +4,7 @@ This file records the project's design choices and their tradeoffs so the decisi
 
 ## 1. Why Supabase Postgres, and why this connection topology
 
-The project could run on a local DuckDB file. It runs on Supabase instead to exercise hosted-Postgres operations (schemas, roles, connection pooling, DDL). Those operational choices matter when data models need to feed sales and customer-success workflows beyond a single-user file.
+The project could run on a local DuckDB file. It runs on Supabase instead to exercise hosted-Postgres operations (schemas, roles, connection pooling, DDL). Those operational choices matter when data models need to feed sales and post-sale health workflows beyond a single-user file.
 
 The connection uses the **session pooler on port 5432**:
 
@@ -170,29 +170,29 @@ The score is not a propensity model and is not trained on outcomes. It is a prio
 
 ## 6a. Marts and queues (Phase 5)
 
-`dim_account` has 2,644 rows. Fit-score bands: **361 priority** (80–90), **815 nurture** (60–79), **1,468 low** (<60). The practical maximum is 90, not 100, because first-party ordering and delivery-marketplace-only cannot both be true.
+`dim_account` has 1,479 rows. Fit-score bands: **134 priority** (80–90), **383 nurture** (60–79), **962 low** (<60). The practical maximum is 90, not 100, because first-party ordering and delivery-marketplace-only cannot both be true.
 
-`mart_sales_queue` has **2,638 independent accounts** (chains excluded). In the recorded build, the observed-capability categories were: 1,072 website not recorded, 784 website recorded with capability unknown, 561 ordering fragments, 121 delivery fragments without an ordering match, and 100 reservation fragments. Signal coverage was **37.2% confirmed** (982 of 2,638). These category names have since been clarified in SQL; counts need a fresh build to reconfirm. The queue is ranked by fit_score; 361 accounts are in the priority band. The top of the queue is not a shortlist — it is a complete ranked market, intended to be filtered by band, territory, or confidence.
+`mart_sales_queue` has **1,477 independent accounts** (chains excluded). Observed-capability categories: 783 website not recorded, 425 website recorded with capability unknown, 190 ordering fragments, 50 delivery fragments without an ordering match, and 29 reservation fragments. Signal coverage is **26.2% confirmed** (387 of 1,477). The queue is ranked by fit_score; 134 accounts are in the priority band. The top of the queue is not a shortlist — it is a complete ranked market, intended to be filtered by band, territory, or confidence.
 
-`mart_cs_queue` has **94 rows**, one per onboarded account. **23 are flagged at risk**: 4 support-medium accounts, 4 renewal-high accounts (all onboarded-never-ordered), and 15 additional low-adoption onboarding-recovery accounts. The 4 renewal-high accounts are a subset of the 19 onboarded-never-ordered accounts, so the union is 23. There are also 49 expansion-review accounts, 22 quarterly-business-review accounts, 4 support check-ins, and 4 renewal-save plays. The queue's signal coverage is **37.2% confirmed** (35 of 94). The small queue is expected: 94 of 2,644 accounts onboarded, which is 3.6% of the account base.
+`mart_cs_queue` is the **Post-Sale Health module**. To demonstrate full-lifecycle GTM engineering, the warehouse also includes a CS queue to track onboarding velocity and expansion risks, ensuring the data layer serves the entire customer journey, not just top-of-funnel acquisition. It has **53 rows**, one per onboarded account, and **13 are flagged at risk**. Recommended plays split into 27 expansion reviews, 13 quarterly business reviews, 9 onboarding recoveries, 2 support check-ins, and 2 renewal saves. Signal coverage is **24.5% confirmed** (13 of 53). The small queue is expected: 53 of 1,479 accounts onboarded, 3.6% of the account base.
 
-`funnel_summary` returns six rows: 925 prospects, 370 demos, 111 won, 94 onboarded, 75 first orders, 53 30-day active; median days between stages are 9.1, 18.3, 8.1, 3.3, and 30.0.
+`funnel_summary` returns six rows: 518 prospects, 207 demos, 62 won, 53 onboarded, 42 first orders, 29 30-day active; median days between stages are 9.1, 20.0, 8.3, 4.1, and 30.0.
 
 `mart_lifecycle_funnel` maps the raw event names to standard CRM stages through [`seeds/lifecycle_mapping.csv`](../seeds/lifecycle_mapping.csv):
 
 | CRM stage | Raw event | Accounts |
 |---|---|---:|
-| Lead | `prospect_created` | 925 |
-| SQL | `demo_booked` | 370 |
-| Opportunity | `closed_won` | 111 |
-| Customer | `onboarded` | 94 |
-| Active | `first_order` | 75 |
+| Lead | `prospect_created` | 518 |
+| SQL | `demo_booked` | 207 |
+| Opportunity | `closed_won` | 62 |
+| Customer | `onboarded` | 53 |
+| Active | `first_order` | 42 |
 
-`closed_won` is the proxy for Opportunity because the generator has no separate `opportunity_created` event. `30_day_active`, `support_ticket`, and `renewal_due` are mapped to Active but flagged `counts_toward_funnel = false`; they are post-sale milestones, not new stage arrivals. That is why Active is 75, not 53. Stage conversions are 40.0%, 30.0%, 84.7%, and 79.8%, with median days 9.1, 18.3, 8.1, and 3.3.
+`closed_won` is the proxy for Opportunity because the generator has no separate `opportunity_created` event. `30_day_active`, `support_ticket`, and `renewal_due` are mapped to Active but flagged `counts_toward_funnel = false`; they are post-sale milestones, not new stage arrivals. That is why Active is 42, not 29. Stage conversions are 40.0%, 30.0%, 85.5%, and 79.3%, with median days 9.1, 20.0, 8.3, and 4.1.
 
 `signal_coverage_pct` is the share of rows in the queue with `signal_confidence = 'confirmed'`, repeated per row. It is a queue-level context metric, not an account-level probability.
 
-**Territory limitation.** 470 accounts (17.8%) have neither a usable postcode nor a city and land in `Unknown`; they are retained, but territory slicing is weaker for that group. The `territory` column is never null, so a null-rate check alone would miss this. Phase 6 adds an Unknown-share monitor.
+**Territory limitation.** 665 accounts (45.0%) have neither a usable postcode nor a city and land in `Unknown`; they are retained, but territory slicing is weaker for that group. The `territory` column is never null, so a null-rate check alone would miss this. Phase 6 adds an Unknown-share monitor.
 
 ## 6b. Outbound approval harness (n8n)
 

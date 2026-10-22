@@ -1,28 +1,41 @@
 # RALI — Restaurant Account Lifecycle Intelligence
 
-Restaurant GTM teams need a reliable way to identify accounts, prioritize outreach, and see what happens after a sale. RALI turns public Dallas restaurant records and website signals into a deduplicated account model and sales queue, then uses clearly labelled synthetic lifecycle events to exercise onboarding, adoption, renewal, and customer-success reporting. Its matching rules, tests, and failure checks make each output traceable to its inputs.
+Popmenu runs a high-velocity, low-ACV GTM motion: thousands of addressable restaurants per market, a sales cycle typically under 30 days, and Salesforce and Salesloft as the system of record and sequencing layer. RALI is a working demonstration of the data and execution layer that motion needs: a single source of truth for Dallas restaurants, a territory-assigned and fit-scored account model, signal-ranked rep queues, CRM identity resolution, and guarded handoffs into Salesloft and post-sale health. Its matching rules, tests, and failure checks make each output traceable to its inputs.
 
 **The real/synthetic boundary is the first thing to understand about this project.** Restaurant identity, address, and website signals are extracted from OpenStreetMap and observed public web pages. Everything about the *account lifecycle* — funnel entry, demos, closes, onboarding, orders, support tickets, renewals, health scores, and every date attached to them — is synthetic, generated with `random.seed(42)` and labelled `source_system = 'synthetic'` in the warehouse. No conversion rate, retention number, or revenue implication in this repository describes a real company or a real market.
 
 > **Build status: Dallas run complete (2026-10-21; logs refreshed 2026-10-22).** `dbt build` passed 197/197 nodes with zero warnings or errors. Measured counts below come from the live Dallas extract and the Supabase warehouse. The committed test log [`docs/dbt_test_output.txt`](docs/dbt_test_output.txt) is the Dallas run, and the offline sample path is built on a 200-account Dallas fixture.
 
-RALI models a restaurant-tech go-to-market and customer-success motion from prospect through post-sale lifecycle. It is built as a dbt project on Supabase Postgres, with four warehouse schemas (`raw`, `staging`, `intermediate`, `marts`), identity resolution over messy map data, explainable account scoring, and monitoring checks that are designed to catch the failure modes this kind of pipeline actually has.
+RALI models a full-funnel restaurant-tech GTM engineering motion from prospect through post-sale lifecycle. It is built as a dbt project on Supabase Postgres, with four warehouse schemas (`raw`, `staging`, `intermediate`, `marts`), identity resolution over messy map data, explainable account scoring, and monitoring checks designed to catch the failure modes this kind of pipeline actually has.
 
 ## What it demonstrates
 
-- **Extract + load into hosted Postgres** with `COPY ... FROM STDIN`, idempotent re-runs, and schema isolation from Supabase's Data API.
-- **Identity resolution** over OSM records: a conservative match ladder (street name, house + street, full address, coordinate fallback, and a 50 m proximity supplement), survivorship by record richness, and a visible `source_record_count`. The [50-cluster audit](docs/dedup_audit_stratified.md) with 10/10 merge precision and 40/40 split precision was run on the historical audit sample; the Dallas extract uses the same unchanged rules but has not been re-audited.
-- **Evidence-based enrichment**: homepage-only website fingerprints that store the matched fragment strings, not just booleans.
-- **Synthetic lifecycle generation** that is deterministic and deliberately messy, with the mess documented rather than hidden.
-- **dbt marts** for a sales queue, a customer-success queue, a CRM lifecycle funnel, a raw-event funnel, and per-account health.
-- **An n8n approval harness** that drafts one outbound message and blocks it at a human Slack approval step.
-- **A Salesloft cadence handoff simulation** that builds an enrollment payload only after a human review and never auto-sends.
+- **A signal-ranked rep research queue.** `mart_rep_research_queue` is the primary rep surface: fit, territory, homepage evidence, possible shared-domain groups, mock CRM review state, a use-case hypothesis, a next research step, and a closed `outreach_ready` gate. [ICP scope and workflow](docs/popmenu_icp.md).
+- **AI guardrails before anything reaches a restaurant.** The inactive [`n8n`](n8n/outbound_harness.json) harness drafts exactly two sentences, checks length, sentence count, URLs, and placeholders, routes failures to a hold branch, and requires human Slack approval; nothing auto-sends.
+- **CRM identity resolution and reverse ETL.** A waterfall (exact domain, exact phone+address, fuzzy name+geo) maps 1,479 accounts to a 50-record mock CRM with 50 matches and zero unflagged low-confidence links; [`scripts/sync_to_crm.py`](scripts/sync_to_crm.py) emits idempotent creates and updates only.
+- **A Salesloft execution handoff.** [`scripts/simulate_salesloft_handoff.py`](scripts/simulate_salesloft_handoff.py) builds a `cadence_membership` payload for `person_id`/`cadence_id` behind the `outreach_ready` gate and never sends.
+- **A single source of truth for the market.** Overpass extract into hosted Postgres with `COPY ... FROM STDIN`, idempotent re-runs, chain filtering, and a 1,479-account Dallas dimension.
+- **Account identity resolution over messy map data.** A conservative match ladder (street name, house + street, full address, coordinate fallback, 50 m proximity), survivorship by record richness, and a visible `source_record_count`; the [50-cluster audit](docs/dedup_audit_stratified.md) documents 10/10 merge precision and 40/40 split precision on the historical audit sample.
+- **Evidence-based enrichment.** Homepage-only fingerprints that store the matched fragment strings, not just booleans.
+- **A Post-Sale Health module.** To demonstrate full-lifecycle GTM engineering, the warehouse also includes a CS queue (`mart_cs_queue`) to track onboarding velocity and expansion risks, ensuring the data layer serves the entire customer journey, not just top-of-funnel acquisition.
 - **A Sales-to-CX exception queue** with territory routing and an inactive workflow for internal handoff alerts.
-- **A reverse-ETL sync simulation** that diffs the warehouse against a mock CRM and emits idempotent create/update payloads.
-- **A CRM identity-resolution waterfall** with exact domain, exact phone+address, and fuzzy name+geo matching; sub-95% candidates are flagged for human review.
+- **Synthetic lifecycle generation** that is deterministic and deliberately messy, with the mess documented rather than hidden.
 - **A rules-based fit score** that can be explained in one paragraph without opening the code.
-- **A rep research view** that separates homepage clues, product hypotheses, possible shared-domain groups, and CRM checks. [ICP scope and workflow](docs/popmenu_icp.md).
 - **Monitoring and tests** that answer "how would I know it broke?" rather than only "does it run?"
+
+## Built for the Popmenu GTM Engineer role
+
+This repo is scoped to the [Popmenu GTM Engineer posting](https://apply.workable.com/popmenu/j/0CC5B68239): a first-build role owning the systems behind a high-velocity, low-ACV motion, with Salesforce and Salesloft as the system of record and sequencing layer.
+
+| JD ask | Where this repo demonstrates it |
+|---|---|
+| A single source of truth for every addressable restaurant, territory-assigned, enriched and scored on fit and intent | Overpass → `raw.osm_restaurants` → `dim_account`: 1,479 Dallas accounts, ZIP-based territory, fit score 0–90, observed capabilities |
+| Put reps in front of prioritized, signal-ranked queues instead of a blank search bar | `mart_sales_queue` (1,477 ranked) and `mart_rep_research_queue` (evidence, hypothesis, next step, closed `outreach_ready` gate) |
+| AI in production with evals, guardrails, and human review before anything reaches a restaurant | n8n harness: two-sentence draft, length/sentence/URL/placeholder checks, hold branch, Slack approval, no auto-send |
+| CRM architecture and connecting two systems with no native integration | `crm_identity_map` waterfall and `sync_to_crm.py` idempotent reverse ETL (84 creates / 20 updates against the Dallas mock) |
+| Salesloft sequencing as the execution layer | `simulate_salesloft_handoff.py` builds the `cadence_membership` payload behind a human gate and never sends |
+| Orchestrate Sales-to-CX handoffs and post-sale health | `mart_handoff_exceptions` plus the `mart_cs_queue` Post-Sale Health module |
+| Measure leverage: hours removed, territory coverage, data accuracy, booked conversations, speed to lead | Monitoring checks, dedup audit, signal-coverage metrics, queue reconciliation, 197 dbt nodes |
 
 ## Source scope
 
@@ -41,11 +54,15 @@ The account universe is Dallas full-service restaurants: `amenity=restaurant` in
 - `dim_account` — 1,479 accounts, fit score 0–90 (the practical max is 90 because ordering and delivery-only are mutually exclusive).
 - `mart_sales_queue` — 1,477 independent accounts ranked by fit; 134 priority, 383 nurture, 960 low.
 - `mart_rep_research_queue` — additive view with evidence, research prompts, possible multi-location groups, and a closed outreach gate. The Dallas build returns 1,477 rows, 125 with a possible shared-domain group, and 0 ready for outreach.
-- `mart_cs_queue` — 53 onboarded accounts; 13 at risk, 27 expansion reviews, 2 support check-ins, 2 renewal saves.
+- `mart_cs_queue` — the **Post-Sale Health module**: 53 onboarded accounts; 13 at risk, 27 expansion reviews, 9 onboarding recoveries, 2 support check-ins, 2 renewal saves.
 - `mart_handoff_exceptions` — 9 closed-won Dallas accounts missing onboarding, with a demo owner assignment and a stable notification key.
 - `funnel_summary` — 518 → 207 → 62 → 53 → 42 → 29 across the six raw stages.
 - `mart_lifecycle_funnel` — CRM stages Lead 518 → SQL 207 → Opportunity 62 → Customer 53 → Active 42, with stage conversion and median days.
 - `crm_identity_map` — 1,479 accounts; 50 matched to the Dallas mock CRM (20 exact domain, 15 exact phone+address, 15 fuzzy name+geo), 0 flagged for human review. The other 1,429 accounts have no CRM candidate.
+
+### Post-Sale Health module
+
+To demonstrate full-lifecycle GTM engineering, the warehouse also includes a CS queue to track onboarding velocity and expansion risks, ensuring the data layer serves the entire customer journey, not just top-of-funnel acquisition. `mart_cs_queue` is that module: it reads `fct_account_health` for the 53 onboarded accounts and ranks them by support risk, renewal risk, adoption score, and the expansion flag. It is downstream of the sales motion rather than a separate product thesis.
 
 Both queues expose `signal_confidence`, `failure_class`, and `signal_coverage_pct` as top-level columns. Dallas queue coverage is 26.2% confirmed; the other 73.8% are flagged as unknown rather than silently treated as “no signal.”
 
@@ -77,7 +94,7 @@ The production split is deliberate: the queue owns rank, evidence, and the close
 
 ## Sales-to-CX handoff alerts
 
-The CS queue begins after onboarding, so it cannot surface a closed-won account that never reaches that stage. [`mart_handoff_exceptions`](models/marts/mart_handoff_exceptions.sql) lists those accounts and assigns a demo CX owner by territory. The inactive [`n8n/handoff_alerts.json`](n8n/handoff_alerts.json) template can notify that person internally after private recipient mapping is configured. It logs accepted alerts to avoid ordinary duplicate runs; it does not contact restaurants. [Setup and limits](docs/handoff_alerts.md).
+The Post-Sale Health module begins after onboarding, so it cannot surface a closed-won account that never reaches that stage. [`mart_handoff_exceptions`](models/marts/mart_handoff_exceptions.sql) lists those accounts and assigns a demo CX owner by territory. The inactive [`n8n/handoff_alerts.json`](n8n/handoff_alerts.json) template can notify that person internally after private recipient mapping is configured. It logs accepted alerts to avoid ordinary duplicate runs; it does not contact restaurants. [Setup and limits](docs/handoff_alerts.md).
 
 ## Operationalizing the Warehouse (Reverse ETL)
 
@@ -158,7 +175,7 @@ The dbt DAG is intentionally shallow. Staging normalizes and types; the intermed
 | `raw` | Python extract/load scripts | `osm_restaurants`, `website_signals`, `lifecycle_events` |
 | `staging` | dbt views + seeds | normalized restaurant records, chain aliases |
 | `intermediate` | dbt view | deduplicated accounts with survivorship metadata |
-| `marts` | dbt tables/incremental | dimensions, facts, sales/CS queues, funnel summary |
+| `marts` | dbt tables/incremental | dimensions, facts, sales/post-sale health queues, funnel summary |
 
 Nothing is created in `public`. Supabase exposes `public` through its Data API; keeping warehouse objects in named schemas means the data is not reachable with the `anon` key by default, without relying on RLS configuration for tables that were never meant to be an API.
 
@@ -219,7 +236,7 @@ On October 22, 2026, the full sample build was rerun in an isolated local Postgr
 - website-signal freshness (7 days),
 - duplicate/over-merge drift on `dedup_key`,
 - orphaned lifecycle events,
-- signal coverage, fit-score range, and queue reconciliation (sales = independent accounts; CS = onboarded accounts).
+- signal coverage, fit-score range, and queue reconciliation (sales = independent accounts; post-sale health = onboarded accounts).
 
 [`docs/how_id_know_it_broke.md`](docs/how_id_know_it_broke.md) explains the threshold behind each check and the failure it catches. An optional `pg_cron` schedule is included as a comment; free-tier projects can run the file manually.
 
