@@ -1,5 +1,7 @@
 # Dedup audit — stratified 50 clusters
 
+Historical Chicago pilot audit. These results assess the matching rules on that sample. The separate [Dallas audit](dallas_dedup_audit.md) reviews its four observed merges and targeted split risks.
+
 **Result: 50/50 correct (100%).** Full-population stratum includes all 10 multi-record merges plus 10 random singletons; null-website and null-postcode strata are 15 each. Merge precision 10/10; split precision 40/40.
 
 This is an agent review of structured OSM fields, not a human storefront check. The sample is stratified by the fields the reviewer named. Row-level data: `docs/dedup_audit_stratified.csv`.

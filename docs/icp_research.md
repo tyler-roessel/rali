@@ -2,7 +2,7 @@
 
 RALI is a Dallas pilot for a restaurant GTM workflow. The independent full-service filter and fit score are a rubric, not a validated customer profile. Restaurant formats differ by location count and service model, and existing digital tools are not automatically disqualifying.
 
-The research layer is a hypothesis, not proof that any account is qualified or in market. The warehouse now models the Dallas market: the 2026-10-21 run used the Dallas bbox (`32.60,-96.99,33.02,-96.55`) and produced 1,479 accounts, 1,477 research-queue rows, and 125 rows with a possible shared-domain group; none is outreach-ready. The historical 50-cluster audit remains the evidence behind the matching rules, and the committed offline sample fixture is Dallas-derived.
+The research layer is a hypothesis, not proof that any account is qualified or in market. The warehouse now models the Dallas market: the 2026-10-21 run used the Dallas bbox (`32.60,-96.99,33.02,-96.55`) and produced 1,479 model account rows, 1,477 research-queue rows, and 125 rows with a possible shared-domain group; none is outreach-ready. The [Dallas dedup audit](dallas_dedup_audit.md) reviews the four observed merges and finds one likely missed duplicate; the older 50-cluster audit is Chicago-only. The committed offline sample fixture is Dallas-derived.
 
 ## What the view adds
 

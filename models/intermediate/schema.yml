@@ -80,8 +80,8 @@ models:
                 values: ["street_address", "street_name", "full_address", "geo_4dp", "geo_50m", "uid_fallback"]
       - name: source_record_count
         description: >
-          Records merged into this account. A value above 1 is a merge that was
-          hand-checked in the Phase 2 audit.
+          Records merged into this account. A value above 1 marks a merge for
+          review; the observed Dallas merges are documented in the Dallas audit.
         tests:
           - not_null
           - dbt_utils.expression_is_true:

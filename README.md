@@ -4,32 +4,26 @@ RALI is a GTM data warehouse for restaurant markets. Restaurant identity, addres
 
 **The real/synthetic boundary is the first thing to understand about this project.** Restaurant identity, address, and website signals are extracted from OpenStreetMap and observed public web pages. Everything about the *account lifecycle* — funnel entry, demos, closes, onboarding, orders, support tickets, renewals, health scores, and every date attached to them — is synthetic, generated with `random.seed(42)` and labelled `source_system = 'synthetic'` in the warehouse. No conversion rate, retention number, or revenue implication in this repository describes a real company or a real market.
 
-> **Build status: Dallas run complete (2026-10-21; logs refreshed 2026-10-22).** `dbt build` passed 197/197 nodes with zero warnings or errors. Measured counts below come from the live Dallas extract and the Supabase warehouse. The committed test log [`docs/dbt_test_output.txt`](docs/dbt_test_output.txt) is the Dallas run, and the offline sample path is built on a 200-account Dallas fixture.
+> **Build status:** The saved Dallas extract and original warehouse build are from 2026-10-21–22; that run passed 197/197 nodes with zero warnings or errors ([committed log](docs/dbt_test_output.txt)). On 2026-10-23, the corrected dedup model was rebuilt against the full saved extract in isolated local Postgres, and the committed 200-account Dallas fixture passed a fresh 197/197-node build. The [Dallas audit](docs/dallas_dedup_audit.md) separates those checks from real-world identity review.
 
-RALI models a full-funnel restaurant GTM lifecycle from prospect through post-sale. It is built as a dbt project on Supabase Postgres, with four warehouse schemas (`raw`, `staging`, `intermediate`, `marts`), identity resolution over inconsistent map data, explainable account scoring, and monitoring checks designed to catch the failure modes this kind of pipeline actually has.
+## From an account record to a rep decision
 
-## What it demonstrates
+After excluding brand-tagged outlets, the Dallas run loads 1,483 OpenStreetMap restaurant records. Conservative deduplication produces 1,479 model account rows; after chain filtering, 1,477 appear in [`mart_rep_research_queue`](models/marts/mart_rep_research_queue.sql). That view ranks accounts and shows the homepage fragments behind each observed capability, a possible shared-domain group, mock CRM match state, and the next manual research step. The fit score orders research; it is not a validated buying signal. [The rep workflow](docs/icp_research.md) explains how to use the view.
 
-- **A signal-ranked rep research queue.** `mart_rep_research_queue` is the primary rep surface: fit, territory, homepage evidence, possible shared-domain groups, mock CRM review state, a use-case hypothesis, a next research step, and a closed `outreach_ready` gate. [ICP research](docs/icp_research.md).
-- **AI guardrails before anything reaches a restaurant.** The inactive [`n8n`](n8n/outbound_harness.json) harness drafts exactly two sentences, checks length, sentence count, URLs, and placeholders, routes failures to a hold branch, and requires human Slack approval; nothing auto-sends.
-- **CRM identity resolution and reverse ETL.** A waterfall (exact domain, exact phone+address, fuzzy name+geo) maps 1,479 accounts to a 50-record mock CRM with 50 matches and zero unflagged low-confidence links; [`scripts/sync_to_crm.py`](scripts/sync_to_crm.py) emits idempotent creates and updates only.
-- **A Salesloft execution handoff.** [`scripts/simulate_salesloft_handoff.py`](scripts/simulate_salesloft_handoff.py) builds a `cadence_membership` payload for `person_id`/`cadence_id` behind the `outreach_ready` gate and never sends.
-- **A single source of truth for the market.** Overpass extract into hosted Postgres with `COPY ... FROM STDIN`, idempotent re-runs, chain filtering, and a 1,479-account Dallas dimension.
-- **Account identity resolution over inconsistent map data.** A conservative match ladder (street name, house + street, full address, coordinate fallback, 50 m proximity), survivorship by record richness, and a visible `source_record_count`; the [50-cluster audit](docs/dedup_audit_stratified.md) documents 10/10 merge precision and 40/40 split precision on the historical audit sample.
-- **Evidence-based enrichment.** Homepage-only fingerprints that store the matched fragment strings, not just booleans.
-- **A Post-Sale Health module.** To demonstrate full-lifecycle GTM engineering, the warehouse also includes a CS queue (`mart_cs_queue`) to track onboarding velocity and expansion risks, ensuring the data layer serves the entire customer journey, not just top-of-funnel acquisition.
-- **A Sales-to-CX exception queue** with territory routing and an inactive workflow for internal handoff alerts.
-- **Synthetic lifecycle generation** that is deterministic and deliberately irregular, with those irregularities documented rather than hidden.
-- **A rules-based fit score** that can be explained in one paragraph without opening the code.
-- **Monitoring and tests** that answer "how would I know it broke?" rather than only "does it run?"
+**One row in the committed Dallas sample:** OpenStreetMap lists Twisted Trompo at 1211 Commerce Street with a website and business phone. The saved homepage fingerprint contains `ordering:toasttab.com`, `ordering:order.online`, and `delivery:doordash`. Its 80-point rules-based score makes it a priority research candidate, while the committed mock CRM map says only that it has no match *in the demo CRM*. A rep would inspect the live site and check the actual CRM for customer, owner, open opportunity, and suppression status before deciding whether there is a relevant conversation. The view's `outreach_ready` value remains `false`; this project does not send a message. The map record, fingerprint, and mock CRM state are in the [offline sample](seeds/raw_accounts_sample.csv), [website signals](seeds/website_signals_sample.csv), and [identity map](seeds/crm_identity_resolution.csv).
+
+```sql
+select account_name, demo_fit_score, homepage_evidence_fragments,
+       demo_crm_review_state, next_research_step, outreach_ready
+from marts.mart_rep_research_queue
+where account_name = 'Twisted Trompo';
+```
+
+The same account model also feeds a simulated CRM sync, an inactive outbound approval harness, and synthetic sales-to-CX and post-sale queues. Those demonstrate handoffs and failure checks; they do not represent live customer outcomes or production integrations. The [Dallas dedup audit](docs/dallas_dedup_audit.md) reviews all four observed merges and targeted split risks. It also finds one likely missed duplicate, so the queue still calls for manual identity review. The separate [Chicago audit](docs/dedup_audit_stratified.md) remains historical evidence.
 
 ## Source scope
 
 The account universe is Dallas full-service restaurants: `amenity=restaurant` inside `32.60,-96.99,33.02,-96.55`, nodes and ways, with a non-empty `name`. The bbox covers Dallas plus its inner-ring suburbs (Richardson, Garland, Irving, Mesquite, Addison, Carrollton, Plano and others), so `territory` is Dallas-centric rather than a Dallas city limit. `amenity=fast_food` is out of scope. The Overpass response returned 1,785 elements; 302 outlets tagged with `brand` or `brand:wikidata` were excluded before load, leaving **1,483 raw records**. The curated chain alias seed is a second, normalized-name check rather than the primary filter. This is a scope choice: the interesting sales motion is the independent operator, not the chain's central procurement team.
-
-## Website signals
-
-694 accounts have a public website. Deduping to normalized hosts gives 624 domains; 1 is a third-party platform page and is not fetched, leaving 623 homepage requests. 473 returned HTTP 200 (75.9% of attempts). Of those, 157 show online ordering (33.2%), 84 reservations (17.8%), 87 delivery-marketplace links (18.4%), and 241 a recognized site platform (51.0%). Evidence fragments are stored per domain; 137 successful pages had no known fragment, which is a limitation of raw-HTML matching, not proof of absence.
 
 ## Synthetic lifecycle
 
@@ -241,8 +235,8 @@ No owner names, personal emails, or mobile numbers are collected. Business phone
 
 ## Limitations
 
-- **OSM is not a business registry.** Closures, renames, and duplicate nodes are normal. On the historical 50-cluster audit sample, dedup precision was audited at 100%; the Dallas run uses identical rules but was not re-audited. Recall is not measured — the under-merge rate for same-name records >50m apart with no shared address is unknown. The dedup is deliberately precision-biased: a TAM list should not silently drop accounts.
-- **The Dallas dedup rate is 0.27%.** 1,483 raw records became 1,479 accounts (4 merges). Recall is unmeasured and this run has not been stratified-audited. The low rate is plausible for this query (only explicitly tagged restaurants, chains removed) and is a limitation, not proof of completeness.
+- **OSM is not a business registry.** Closures, renames, and duplicate or misplaced nodes are normal. The [targeted Dallas audit](docs/dallas_dedup_audit.md) supports all four observed merges but finds a likely false split between Mythri's Indian Cuisine and its pickup node. The older Chicago 50-cluster audit does not establish Dallas precision or recall. The matching rule is deliberately conservative so it does not silently collapse different locations.
+- **The Dallas model's merge rate is 0.27%.** 1,483 raw records became 1,479 account rows (four merges). The audit did not measure recall; the likely false split means 1,479 is a model row count, not a verified count of distinct operating restaurants.
 - **Coverage is incomplete.** OSM does not map every restaurant. This is a representative sample of the mapped Dallas market, not a census; counts describe named, independent, full-service restaurants in the bbox, not every restaurant in Dallas.
 - **Territory has a large Unknown bucket.** 665 accounts (45.0%) have neither a usable postcode nor a city and are retained as `Unknown` rather than dropped; Dallas OSM address coverage is sparser than the earlier extract, so territory slicing is materially weaker here.
 - **Homepage-only fingerprinting undercounts.** Ordering widgets are often injected by JavaScript or a third-party script that does not appear in raw HTML. A missing signal is not evidence that the restaurant lacks the capability.

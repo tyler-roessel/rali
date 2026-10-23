@@ -2,6 +2,8 @@
 
 This file records the project's design choices and their tradeoffs so the decisions can be understood without the code open.
 
+**Run context.** The active market is the Dallas extract from October 21–22, 2026; its counts are summarized in the [README](../README.md). Sections 4, 5, 5a, and 5b retain measured Chicago pilot examples that informed the design. Those figures are historical evidence, not Dallas results. A separate [targeted Dallas dedup audit](dallas_dedup_audit.md) reviews all four observed merges and split-risk candidates; it is not a repeat of the [50-cluster Chicago audit](dedup_audit_stratified.md).
+
 ## 1. Why Supabase Postgres, and why this connection topology
 
 The project could run on a local DuckDB file. It runs on Supabase instead to exercise hosted-Postgres operations (schemas, roles, connection pooling, DDL). Those operational choices matter when data models need to feed sales and post-sale health workflows beyond a single-user file.
@@ -32,9 +34,11 @@ Warehouse objects live in `raw`, `staging`, `intermediate`, and `marts`. Nothing
 
 Every synthetic row carries `source_system = 'synthetic'`. dbt model descriptions and column comments repeat the boundary at the point of use. The README states it in the first 100 words. A reviewer should never be able to cite a funnel number as real.
 
-**Coverage caveat.** OSM coverage of a market's restaurants is roughly 50–65% of the true universe by common estimates. RALI is a representative sample of the mapped market, not a census. Counts in this warehouse mean "named, independent, full-service restaurants mapped in this bbox," not "all restaurants in the market." This is a limitation to state plainly, not a gap to fill with invented records.
+**Coverage caveat.** OSM coverage is incomplete and varies by market. RALI is a sample of the mapped market, not a census. Counts in this warehouse mean "named, independent, full-service restaurants mapped in this bbox," not "all restaurants in the market." This is a limitation to state plainly, not a gap to fill with invented records.
 
 ## 4. Identity resolution
+
+The matching ladder remains in use for Dallas, with pair-local latitude replacing the Chicago constant in the 50 m distance check. The counts and named audit examples in this section come from the earlier Chicago pilot. Dallas produced 1,483 raw records and 1,479 model account rows (four merges); the [Dallas audit](dallas_dedup_audit.md) reviews those merges and identifies one likely missed duplicate.
 
 The expensive mistake in this dataset is over-merging: collapsing two restaurants with the same name into one account. The rule is therefore conservative, but the handoff's simple `name + full address` key was too strict in practice because OSM addresses are frequently partial. A first pass produced 2,654 records → 2,652 accounts: it missed node/way twins where one record lacked a city, postcode, or house number. The implemented ladder keeps the over-merge guard while recovering those clear duplicates.
 
@@ -54,13 +58,15 @@ The 50-cluster audit is in [`docs/dedup_audit.md`](dedup_audit.md), with row-lev
 
 **Canonical key vs survivor address.** `int_account_clusters` first assigns every record an `address_key` from the address ladder. The `geo_50m` pass then finds name-identical pairs within ~50 m and assigns both records the lexicographically least `address_key` in the pair as the canonical `dedup_key`. The survivor is chosen independently by richness (website, then phone, then lowest OSM id). That is why The Corner Farmacy's cluster key is the `n bell ave` key while the surviving row is the `n leavitt st` record: the key is a stable cluster identifier, not a claim about the survivor's address. `int_account_deduped` exposes both `dedup_key` (canonical) and `address_key` (the survivor's own pre-pass key), and `match_rule = geo_50m` records which mechanism fired.
 
-**Dedup rate and limitation.** 2,654 raw records became **2,644 accounts**: 10 merges, or **0.38%**. `select count(*), count(distinct dedup_key) from int_account_deduped` returns **2,644 / 2,644**, so the account count is distinct keys, not a row count. `source_record_count` is 1 for 2,634 accounts and 2 for 10; there are **zero** 3+ clusters. This is lower than the 2–5% duplicate rate typical of POI data, and it is a real limitation, not a result to celebrate.
+**Chicago dedup rate and limitation.** 2,654 raw records became **2,644 accounts**: 10 merges, or **0.38%**. In that run, `select count(*), count(distinct dedup_key) from int_account_deduped` returned **2,644 / 2,644**. `source_record_count` was 1 for 2,634 accounts and 2 for 10; there were **zero** 3+ clusters. The low rate warrants caution: neither that audit nor the Dallas run measures missed duplicates.
 
-The 50-cluster audit in [`docs/dedup_audit_stratified.md`](dedup_audit_stratified.md) includes all 10 merges plus 10 random full-population singletons, 15 null-website accounts, and 15 null-postcode accounts. Result: **50/50 correct; merge precision 10/10; split precision 40/40.** No over-merges and no false splits were observed. The low rate is plausible because the query only returns elements explicitly tagged `amenity=restaurant` (a building way without the tag is not a duplicate in this extract), chain-tagged records were removed, and Chicago OSM is mature. It may still be over-conservative for old/new addresses and name variants: Luella's Southern Kitchen appears at 4114 N Kedzie and 4609 N Lincoln with the same phone/website; Bongiorno's Cucina and Bongiorno's Deli share an address and phone but have different service names; Friends Sushi, Wow Bao, and Silk Road each have a no-address record 270–400 m from an addressed twin. These are kept separate because the evidence cannot distinguish a move or a second concept from a second location. Recall is unmeasured; the audit is powered to catch over-merging, not to prove completeness.
+The 50-cluster Chicago audit in [`docs/dedup_audit_stratified.md`](dedup_audit_stratified.md) includes all 10 merges plus 10 random full-population singletons, 15 null-website accounts, and 15 null-postcode accounts. Result: **50/50 correct; merge precision 10/10; split precision 40/40.** No over-merges and no false splits were observed in that sample. It may still be over-conservative for old/new addresses and name variants: Luella's Southern Kitchen appears at 4114 N Kedzie and 4609 N Lincoln with the same phone/website; Bongiorno's Cucina and Bongiorno's Deli share an address and phone but have different service names; Friends Sushi, Wow Bao, and Silk Road each have a no-address record 270–400 m from an addressed twin. These are kept separate because the evidence cannot distinguish a move or a second concept from a second location. Recall is unmeasured; the audit is powered to catch over-merging, not to prove completeness.
 
 
 
 ## 5. Chain and fast-food filtering
+
+The filter rules apply to Dallas. The pre-flight counts and named examples below are from Chicago.
 
 This is a two-stage decision, because the stages answer different questions.
 
@@ -72,7 +78,9 @@ The Stage 1 chain-exclusion count is reported alongside the final extract count.
 
 A pre-flight exact-name check on the 2,654 loaded records found 6 residual matches (Protein Bar 5, Roti 1). The low number is not evidence of a broken seed: zero Subway, Starbucks, McDonald's, Chipotle, Dunkin', or other major-chain names remain, because the brand filter already removed them. The Phase 2 dbt model is the authoritative number; if it differs materially from 6, the normalization or alias join is the first place to look.
 
-## 5a. Website fingerprinting (Phase 3)
+## 5a. Website fingerprinting (historical Chicago run)
+
+The collection rules and evidence fields below still apply. The domain counts, fetch outcomes, and vendor frequencies describe the earlier Chicago run. The current Dallas website counts are in the [README](../README.md#website-signals).
 
 The account universe has 1,569 accounts with a non-null website. Deduping by normalized host gives **1,429 unique hosts**, which is 140 duplicate account-host mappings overall. Four of those hosts are third-party platform pages (Yelp, Facebook, Instagram, OpenTable) covering 7 accounts, leaving **1,425 first-party hosts** covering **1,562 first-party accounts**: 137 of those accounts share a host with another account. The earlier “140 accounts share a host” shorthand was the all-in duplicate mapping count, not the first-party count. That is under the 2,000 cap.
 
@@ -120,7 +128,9 @@ That is **586 of 1,569 accounts (37.3%) without a fingerprint**. The often-quote
 
 The Phase 5 fit score awards points only for positive signals. `dim_account` carries `signal_confidence` and `failure_class` so a reviewer can separate “observed absent” from “not observed”; unknown accounts get zero signal points rather than a negative inference. Even a `confirmed` page is raw-HTML evidence, so JavaScript-injected ordering remains a known blind spot.
 
-## 5b. Synthetic lifecycle (Phase 4)
+## 5b. Synthetic lifecycle (historical Chicago run)
+
+The generator rules below still apply. The 925-account funnel and 1,636 events describe the earlier Chicago population; the Dallas run has 518 funnel entrants and 915 events.
 
 The account identity is real; the lifecycle is completely synthetic. `generate_lifecycle.py` uses `random.Random(42)`, `uuid5` account/event ids, a fixed UTC anchor, and sorted populations before every sample. No `now()` enters the events.
 
@@ -168,13 +178,13 @@ In one paragraph: an account scores 25 for being independent, 15 for having a we
 
 The score is not a propensity model and is not trained on outcomes. It is a prioritization device that a sales lead can argue with.
 
-## 6a. Marts and queues (Phase 5)
+## 6a. Marts and queues (Dallas run)
 
 `dim_account` has 1,479 rows. Fit-score bands: **134 priority** (80–90), **383 nurture** (60–79), **962 low** (<60). The practical maximum is 90, not 100, because first-party ordering and delivery-marketplace-only cannot both be true.
 
 `mart_sales_queue` has **1,477 independent accounts** (chains excluded). Observed-capability categories: 783 website not recorded, 425 website recorded with capability unknown, 190 ordering fragments, 50 delivery fragments without an ordering match, and 29 reservation fragments. Signal coverage is **26.2% confirmed** (387 of 1,477). The queue is ranked by fit_score; 134 accounts are in the priority band. The top of the queue is not a shortlist — it is a complete ranked market, intended to be filtered by band, territory, or confidence.
 
-`mart_cs_queue` is the **Post-Sale Health module**. To demonstrate full-lifecycle GTM engineering, the warehouse also includes a CS queue to track onboarding velocity and expansion risks, ensuring the data layer serves the entire customer journey, not just top-of-funnel acquisition. It has **53 rows**, one per onboarded account, and **13 are flagged at risk**. Recommended plays split into 27 expansion reviews, 13 quarterly business reviews, 9 onboarding recoveries, 2 support check-ins, and 2 renewal saves. Signal coverage is **24.5% confirmed** (13 of 53). The small queue is expected: 53 of 1,479 accounts onboarded, 3.6% of the account base.
+`mart_cs_queue` has **53 rows**, one per synthetically onboarded account, and **13 are flagged at risk**. Recommended plays split into 27 expansion reviews, 13 quarterly business reviews, 9 onboarding recoveries, 2 support check-ins, and 2 renewal saves. Signal coverage is **24.5% confirmed** (13 of 53). The small queue follows the generated lifecycle: 53 of 1,479 accounts onboarded, 3.6% of the account base.
 
 `funnel_summary` returns six rows: 518 prospects, 207 demos, 62 won, 53 onboarded, 42 first orders, 29 30-day active; median days between stages are 9.1, 20.0, 8.3, 4.1, and 30.0.
 
@@ -202,13 +212,13 @@ The score is not a propensity model and is not trained on outcomes. It is a prio
 
 [`scripts/sync_to_crm.py`](../scripts/sync_to_crm.py) is a local simulation, not a live CRM integration. It reads `marts.mart_sales_queue` where `fit_score >= 80`, matches `mock_crm_records.json` on `account_id`, and emits creates or updates when any desired field differs or is missing from the mock record. Unchanged accounts emit nothing; CRM-only records are ignored so the sync never deletes.
 
-The idempotency key is a SHA-256 of `account_id` plus the desired fields (name, score, rank, territory, observed capability, confidence). Retrying the same desired state produces the same key even though `sync_timestamp` changes. The previous recorded build yielded 361 priority accounts, 358 creates, 3 updates, 0 unchanged, 1 CRM-only ignored, 361 payloads. The three existing records were missing fields that the sync writes; Asadito also had a changed fit score. The clarified field name and values need a fresh warehouse build before those counts are reconfirmed. Two runs with the same fixed timestamp produce byte-identical payloads.
+The idempotency key is a SHA-256 of `account_id` plus the desired fields (name, score, rank, territory, observed capability, confidence). Retrying the same desired state produces the same key even though `sync_timestamp` changes. Against the committed Dallas mock, 134 priority accounts and 51 CRM records yield 84 creates, 20 updates, 30 unchanged, and 1 CRM-only record ignored: 104 payloads. The mock contains 30 exact snapshots, 20 deliberately stale records, and one CRM-only row. Two runs with the same fixed timestamp produce byte-identical payloads.
 
 Production would add OAuth/secrets, a real CRM client, batching, rate limits, retries with a dead-letter path, and an audit log. The point of the simulation is the boundary: the warehouse computes the desired state; the edge computes the diff and performs idempotent upserts.
 
 ## 6d. CRM identity resolution
 
-[`scripts/resolve_identities.py`](../scripts/resolve_identities.py) writes a 2,644-row mapping seed from `dim_account` and `seeds/mock_crm_accounts.csv`. Matching is one-to-one and waterfalled:
+[`scripts/resolve_identities.py`](../scripts/resolve_identities.py) writes a 1,479-row Dallas mapping seed from `dim_account` and `seeds/mock_crm_accounts.csv`. Matching is one-to-one and waterfalled:
 
 1. exact normalized domain (confidence 100);
 2. exact phone (last ten digits) plus normalized address (confidence 100);
@@ -216,7 +226,7 @@ Production would add OAuth/secrets, a real CRM client, batching, rate limits, re
 
 The fuzzy stage requires name similarity ≥ 0.55 and distance ≤ 500 m. Candidates below 95 are still mapped but carry `needs_human_review = true`. Unmatched accounts keep a row with a null `crm_account_id`, confidence 0, and method `unmatched`; they are not review cases because there is no candidate. CRM-only records are ignored and counted in the run summary.
 
-Current result: 6 matches (2 exact domain, 1 exact phone+address, 3 fuzzy), 2,638 unmatched, 3 review candidates, 1 CRM-only. `models/marts/crm_identity_map.sql` inner-joins the mapping to `dim_account`, so live is 2,644 rows and the 200-account sample map is 200 rows. The resolution seed is committed for clean-clone builds; the script is the generator, not a live CRM call.
+Dallas result: 50 matches (20 exact domain, 15 exact phone+address, 15 fuzzy), 1,429 unmatched, and 0 flagged for human review. All 50 demo CRM records are used. `models/marts/crm_identity_map.sql` inner-joins the mapping to `dim_account`, so the live map has 1,479 rows and the Dallas offline sample map has 200. The resolution seed is committed for clean-clone builds; the script is the generator, not a live CRM call.
 
 ## 7. Incremental strategy
 
@@ -234,7 +244,7 @@ The handoff asks for a 200-account sample and a clean-clone build. `--select sam
 | `raw.website_signals` | `raw.website_signals` | `staging.website_signals_sample` |
 | `raw.lifecycle_events` | `raw.lifecycle_events` | `staging.lifecycle_events_sample` |
 
-The sample is 200 clusters (all 10 merges + 190 deterministic singletons), 210 raw rows, 119 signal rows, and 123 synthetic lifecycle events. The lifecycle seed is generated from the **sample deduped account ids**, not the live account table, so relationships line up. `extract/build_sample_seeds.py` implements the two-pass generation; the committed seeds are the result.
+The committed Dallas fixture has 200 accounts, 204 raw rows, 88 website-signal rows, and 123 synthetic lifecycle events. The lifecycle seed is generated from the **sample deduped account ids**, not the live account table, so relationships line up. `extract/build_sample_seeds.py` implements the two-pass generation; the committed seeds are the result.
 
 Build:
 
@@ -260,13 +270,13 @@ The remaining honest caveats are the dedup rate/recall (0.27%, unmeasured recall
 
 - **OSM primary key.** OSM IDs are unique per element type, not globally: node `123` and way `123` can both exist in the same extract. The spec's `PRIMARY KEY (osm_id)` would reject a legitimate record. The implementation uses a composite key / `osm_uid` (`osm_type || ':' || osm_id`) and keeps `osm_id` as a bigint for traceability. This is a correctness fix, flagged rather than silently applied.
 - **Direct connection fallback.** The project does not implement one. If the session pooler is unreachable, the correct response is to fix the network or the pooler setting, not to fall back to an IPv6-only host that will fail intermittently.
-- **Volume gate.** If the bbox returns more than 2,000 elements, Phase 1 stops and reports the count rather than truncating. All 2,654 post-filter records were loaded for this run after reviewing the scope: the cap was a heuristic, and a complete bbox is a stronger claim than a sample. A deterministic geographic sub-sample remains the fallback if the scope is ever narrowed.
-- **Phase 3 fetch cap.** The domain cap is 2,000, not 1,000. At roughly 2,650 accounts with a 60–70% website rate, the expected domain count is 1,600–1,850; the exact count is reported at the Phase 3 gate before any fetches start. Fetches are sequential with a polite delay, so a one-time run is roughly an hour.
+- **Volume gate.** If the bbox returns more than 2,000 elements, Phase 1 stops and reports the count rather than truncating. The Dallas response returned 1,785 elements; after 302 brand-tag exclusions, 1,483 records were loaded. A larger future scope needs review rather than silent truncation.
+- **Phase 3 fetch cap.** The domain cap is 2,000, not 1,000. Dallas had 624 unique domains; one third-party page was skipped, leaving 623 homepage requests. Fetches are sequential with a polite delay.
 - **Overpass endpoint.** The primary `overpass-api.de` interpreter returned HTTP 502 on the first full request. The extractor accepts an `OVERPASS_URL` override so a public mirror can be used without changing the query. The gate report names the endpoint used; the data is OpenStreetMap either way.
 - **Fit-score practical maximum is 90.** The spec's weights sum to 100, but first-party ordering and delivery-marketplace-only are mutually exclusive. The rubric keeps the exact weights and the 100 cap; no account can score above 90. This is documented in the table and the one-paragraph explanation.
 - **Third-party website pages are skipped.** Yelp, Facebook, Instagram, and OpenTable pages are written with `fetch_status='skipped_third_party'`, not fetched. This respects source terms and avoids treating a platform page as the restaurant's homepage. It is a deliberate deviation from "fetch every website."
-- **Territory has an Unknown bucket.** 470 accounts (17.8%) lack both a usable postcode and city. They are retained as `Unknown` rather than dropped; the monitoring check alerts on the Unknown share because the null rate alone would be zero.
-- **Dedup rate is 0.38%.** 10 merges from 2,654 raw records; the stratified audit found 10/10 merge precision and 40/40 split precision, but recall is unmeasured. The low rate is plausible for this query and documented as a limitation, not treated as proof of completeness.
+- **Territory has an Unknown bucket.** 665 Dallas accounts (45.0%) lack both a usable postcode and city. They are retained as `Unknown` rather than dropped; the monitoring check alerts on the Unknown share because the null rate alone would be zero.
+- **Dallas model merge rate is 0.27%.** Four merges from 1,483 raw records produced 1,479 account rows. The [Dallas audit](dallas_dedup_audit.md) supports those four merges but identifies one likely missed duplicate; recall remains unmeasured. The earlier Chicago stratified audit does not establish Dallas accuracy.
 - **`days_since_last_order`.** The lifecycle generator emits a `first_order` event, not a stream of repeat orders. Until repeat order events exist, `days_since_last_order` and `days_since_first_order` are the same quantity. The column comment says so; the alternative would be inventing order history that the spec does not ask for.
 
 ## 10. What I would do with 10x the time

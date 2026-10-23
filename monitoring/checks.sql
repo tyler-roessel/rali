@@ -84,7 +84,7 @@ WHERE prev_count IS NOT NULL
   AND (row_count - prev_count)::numeric / nullif(prev_count, 0) < -0.05;
 
 -- 2. Territory/full-address drift. Territory is never null, so Unknown is
--- checked separately; a null-only check would miss the 17.8% Unknown bucket.
+-- checked separately; a null-only check would miss the Dallas Unknown bucket.
 SELECT
     round(avg((territory IS NULL)::int)::numeric, 4)        AS territory_null_rate,
     round(avg((territory = 'Unknown')::int)::numeric, 4)    AS territory_unknown_rate,

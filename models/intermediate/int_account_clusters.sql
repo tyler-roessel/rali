@@ -98,7 +98,8 @@ multi_names as (
 -- A proximity edge only exists when the name matches exactly and the two
 -- records are within ~50 m. It supplements the address rules, it does not
 -- replace them: different addresses on the same street remain separate unless
--- they are both close and name-identical.
+-- they are both close and name-identical. Scale longitude at each pair's mean
+-- latitude so the threshold remains local to the market being processed.
 geo_pairs as (
     select
         a.address_key as key_a,
@@ -115,7 +116,11 @@ geo_pairs as (
         and b.lat is not null
         and b.lon is not null
         and power((a.lat - b.lat) * 111000, 2)
-            + power((a.lon - b.lon) * 111000 * cos(radians(41.8)), 2)
+            + power(
+                (a.lon - b.lon) * 111000
+                * cos(radians((a.lat + b.lat) / 2)),
+                2
+            )
             <= power(50, 2)
 ),
 

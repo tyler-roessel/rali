@@ -1,5 +1,7 @@
 # Dedup audit — 50 clusters
 
+Historical Chicago pilot audit. These results assess the matching rules on that sample. The separate [Dallas audit](dallas_dedup_audit.md) reviews its four observed merges and targeted split risks.
+
 **Result: 50/50 correct (100%). Merge precision 10/10; split precision 40/40.**
 
 This is an agent review of the structured OSM fields in the warehouse, not a human visual verification of every storefront. The sample is stratified, not random: all 10 multi-record clusters, all 8 same-street/different-house clusters, 15 same-name multi-location clusters, and 17 deterministic random singletons. The full row-level data is in `docs/dedup_audit.csv`.

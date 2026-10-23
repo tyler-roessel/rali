@@ -1,8 +1,8 @@
 """Build the committed 200-account offline sample seeds.
 
-The sample is 200 clusters: all 10 multi-record clusters plus 190 deterministic
-singletons. It exports the raw OSM rows, the website signals for those accounts'
-domains, and a deterministic synthetic lifecycle for the sample accounts.
+The sample is 200 clusters: every multi-record cluster plus enough deterministic
+singletons to reach 200. It exports the raw OSM rows, the website signals for
+those accounts' domains, and a deterministic synthetic lifecycle for the sample accounts.
 
 Run from the repo root with live Supabase credentials.
 
